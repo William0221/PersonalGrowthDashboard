@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>股票入門到進階 · 互動教學</title>
+<style>
+:root{
+  --bg:#0f1419; --panel:#1a2230; --panel2:#232d3f; --line:#2c3a52;
+  --txt:#e8eef7; --sub:#9fb0c8; --accent:#3da9fc; --accent2:#54e0a8;
+  --warn:#ffb454; --danger:#ff6b6b; --chip:#27344a;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{-webkit-text-size-adjust:100%}
+body{font-family:"Noto Sans TC","PingFang TC","Microsoft JhengHei",system-ui,sans-serif;
+  background:var(--bg);color:var(--txt);line-height:1.7;padding-bottom:60px}
+.topbar{position:sticky;top:0;z-index:30;background:var(--bg);border-bottom:1px solid var(--line);
+  box-shadow:0 6px 14px rgba(0,0,0,.3)}
+header{padding:12px 16px 8px}
+.title{font-size:1.15rem;font-weight:800;letter-spacing:.5px}
+.title span{color:var(--accent)}
+.sub{font-size:.78rem;color:var(--sub);margin-top:2px}
+.search{margin-top:12px;display:flex;gap:8px}
+.search input{flex:1;background:var(--panel);border:1px solid var(--line);color:var(--txt);
+  padding:11px 14px;border-radius:12px;font-size:.95rem;outline:none}
+.search input:focus{border-color:var(--accent)}
+.tabs{display:flex;gap:8px;overflow-x:auto;padding:4px 16px 10px;-webkit-overflow-scrolling:touch}
+.tabs::-webkit-scrollbar{display:none}
+.tab{white-space:nowrap;background:var(--chip);color:var(--sub);border:1px solid var(--line);
+  padding:8px 14px;border-radius:999px;font-size:.85rem;cursor:pointer;transition:.15s;flex:0 0 auto}
+.tab.active{background:var(--accent);color:#04121f;border-color:var(--accent);font-weight:700}
+.wrap{max-width:760px;margin:0 auto;padding:8px 16px}
+.count{font-size:.78rem;color:var(--sub);margin:8px 2px 12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;
+  padding:16px 18px;margin-bottom:12px}
+.card h3{font-size:1.05rem;display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.en{font-size:.78rem;color:var(--accent);font-weight:600}
+.cat-pill{font-size:.68rem;background:var(--chip);color:var(--sub);padding:2px 9px;border-radius:999px;margin-left:auto}
+.card p{margin-top:8px;color:var(--txt);font-size:.93rem}
+.eg{margin-top:10px;background:var(--panel2);border-left:3px solid var(--warn);
+  padding:10px 12px;border-radius:8px;font-size:.88rem;color:#e3d3b6;display:flex;gap:10px;align-items:flex-start}
+.eg .ico{font-size:1.4rem;line-height:1.3;flex:0 0 auto}
+.eg .txt b{color:var(--warn)}
+.formula{margin-top:8px;font-size:.84rem;color:var(--sub)}
+.formula b{color:var(--accent2)}
+.empty{text-align:center;color:var(--sub);padding:40px 0}
+.modebar{display:flex;gap:8px;padding:0 16px 4px;max-width:760px;margin:0 auto}
+.mode-btn{flex:1;background:var(--panel);border:1px solid var(--line);color:var(--sub);
+  padding:9px;border-radius:12px;font-size:.85rem;font-weight:700;cursor:pointer}
+.mode-btn.active{background:var(--accent2);color:#042316;border-color:var(--accent2)}
+.quizbox{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;margin-top:8px}
+.q-prog{font-size:.78rem;color:var(--sub);margin-bottom:6px}
+.q-text{font-size:1.05rem;font-weight:700;margin-bottom:14px}
+.opt{display:block;width:100%;text-align:left;background:var(--panel2);border:1px solid var(--line);
+  color:var(--txt);padding:13px 15px;border-radius:12px;margin-bottom:10px;font-size:.93rem;cursor:pointer;transition:.12s}
+.opt:hover{border-color:var(--accent)}
+.opt.correct{background:#143a2a;border-color:var(--accent2);color:var(--accent2)}
+.opt.wrong{background:#3a1a1a;border-color:var(--danger);color:var(--danger)}
+.opt:disabled{cursor:default}
+.q-exp{margin-top:6px;font-size:.86rem;color:var(--sub);background:var(--panel2);padding:10px 12px;border-radius:10px;display:none}
+.q-next{margin-top:14px;width:100%;background:var(--accent);color:#04121f;border:none;
+  padding:13px;border-radius:12px;font-size:.95rem;font-weight:800;cursor:pointer;display:none}
+.score{text-align:center;padding:30px 10px}
+.score .big{font-size:2.4rem;font-weight:900;color:var(--accent2)}
+.retry{margin-top:18px;background:var(--accent);color:#04121f;border:none;padding:12px 28px;border-radius:12px;font-weight:800;cursor:pointer}
+footer{text-align:center;color:var(--sub);font-size:.72rem;padding:24px 16px;line-height:1.6}
+@media(min-width:640px){.title{font-size:1.3rem}}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <header>
+    <div class="wrap" style="padding:0">
+      <div class="title">📈 股票<span>教學</span>App</div>
+      <div class="sub">入門 → 進階 · 每個名詞都用生活例子＋圖示說明</div>
+      <div class="search"><input id="search" type="search" placeholder="🔍 搜尋名詞（中／英／關鍵字）…" autocomplete="off"></div>
+    </div>
+  </header>
+  <div class="modebar">
+    <button class="mode-btn active" data-mode="learn">📖 學習模式</button>
+    <button class="mode-btn" data-mode="quiz">📝 測驗模式</button>
+  </div>
+  <div class="tabs" id="tabs"></div>
+</div>
+
+<div id="learnView">
+  <div class="wrap">
+    <div class="count" id="count"></div>
+    <div id="list"></div>
+  </div>
+</div>
+
+<div id="quizView" class="wrap" style="display:none"></div>
+
+<footer>
+  本App僅供教育用途，所有內容為投資知識教學，<b>不構成任何投資建議</b>。<br>
+  股市有風險，投資前請自行評估並承擔風險。
+</footer>
+
+<script>
+const DATA = [
+ // ── 基礎名詞 ──
+ {cat:"基礎名詞",zh:"股票",en:"Stock",icon:"🏪",def:"一張「公司的所有權證明」。買了某公司的股票，你就成了它的小老闆之一，公司賺錢分紅時你有份。",eg:"想像一家雞排店切成1000份，你買1份，就擁有這家店千分之一，店賺錢就分你千分之一。"},
+ {cat:"基礎名詞",zh:"股價",en:"Stock Price",icon:"🏷️",def:"現在買賣「一股」要多少錢。它隨時在變，因為它就是當下想買的人和想賣的人喊出來的價格。",eg:"像菜市場的青菜，搶的人多就漲價，沒人要就降價，價格一直跳動。"},
+ {cat:"基礎名詞",zh:"成交量",en:"Volume",icon:"📦",def:"一段時間內這檔股票「總共被買賣了多少」。量大代表很多人在交易、很熱門；量小代表沒什麼人理它。",eg:"像一家店今天賣出幾份餐：賣得多代表人氣旺，門可羅雀代表冷清。"},
+ {cat:"基礎名詞",zh:"市值",en:"Market Cap",icon:"🍕",def:"這家公司「整間值多少錢」。把每股的價格乘上全部股數就知道公司的身價。",formula:"市值 = 股價 × 總股數",eg:"一片披薩一塊50元、切成8塊，整片就值400元；市值就是把整片披薩的價錢算出來。"},
+ {cat:"基礎名詞",zh:"大盤（加權指數）",en:"TAIEX",icon:"📊",def:"把全台灣上市公司「整體表現」濃縮成一個數字，用來看今天股市整體是漲還是跌。台股看「加權指數」，美股常看標普500、道瓊。",eg:"像全班的「平均分數」：個別同學考好考壞，但平均分讓你一眼看出全班今天表現如何。"},
+ {cat:"基礎名詞",zh:"多頭／空頭",en:"Bull / Bear",icon:"🐂",def:"多頭＝大家看好、股價往上的氣氛；空頭＝大家看壞、股價往下的氣氛。",eg:"多頭像旺季，店家都覺得會大賺；空頭像淡季，大家縮手觀望。"},
+ {cat:"基礎名詞",zh:"漲跌停",en:"Limit Up/Down",icon:"🎢",def:"為了避免一天暴漲暴跌，規定一檔股票「一天最多漲或跌多少」。台股是當天上下10%，碰到就不能再動。",eg:"像遊樂設施的安全限制，衝太快會被自動煞停，避免失控。"},
+ {cat:"基礎名詞",zh:"除權息",en:"Ex-Dividend",icon:"🐷",def:"公司把賺的錢分給股東（發股利）那天，股價會先扣掉發出去的金額。發現金叫「除息」，發股票叫「除權」。之後股價若漲回原位，叫「填權息」。",eg:"像撲滿裡的錢拿出來分給你，撲滿當然變輕（股價下降），但錢進了你口袋，總財產沒少。"},
+ {cat:"基礎名詞",zh:"殖利率",en:"Dividend Yield",icon:"🏦",def:"用「股價」去算，公司每年發的現金紅利大概等於幾%的報酬，常用來看存股划不划算。",formula:"殖利率 = 每年現金股利 ÷ 股價",eg:"花100元買的股票，每年發你5元，等於放著就有5%回報，跟銀行利息5%是類似的概念。"},
+ {cat:"基礎名詞",zh:"零股",en:"Odd Lot",icon:"🥤",def:"一般買股是1張＝1000股一起買，零股就是讓你「買不滿一張、買幾股都行」，適合錢不多的人買貴的股票。",eg:"整箱飲料太貴買不起，零股就像讓你「單瓶」買，想買幾瓶都可以。"},
+ {cat:"基礎名詞",zh:"ETF",en:"ETF",icon:"🧺",def:"一籃子股票打包成一個商品，買一個就等於同時買進一堆公司，自動幫你分散、不用自己選股。台股常見的有0050、0056。",eg:"像買「綜合水果禮盒」，一次擁有多種水果，不必煩惱單買哪一種。"},
+
+ // ── 技術分析 ──
+ {cat:"技術分析",zh:"K線（蠟燭圖）",en:"Candlestick",icon:"🕯️",def:"一根小柱子，記錄某一天股價的「開盤、收盤、最高、最低」。紅色代表當天收比開高（上漲），綠色代表收比開低（下跌）。",eg:"像每天的天氣紀錄卡，一根就告訴你今天股價從哪開始、漲到多高、跌到多低、最後停在哪。"},
+ {cat:"技術分析",zh:"均線",en:"Moving Average",icon:"😊",def:"把最近幾天的股價「算平均」連成一條線，用來看趨勢往上還往下。常看5日、20日、60日。",formula:"5日均線 = 最近5天收盤價相加 ÷ 5",eg:"像看一個人最近5天的平均心情，比看今天單一天，更能判斷他整體是越來越開心還是低落。"},
+ {cat:"技術分析",zh:"黃金交叉／死亡交叉",en:"Golden / Death Cross",icon:"🏎️",def:"短天數的平均線「由下往上穿過」長天數的，代表近期轉強（黃金交叉，偏好）；反過來由上往下穿過，代表轉弱（死亡交叉，偏壞）。",eg:"像短期氣氛超車了長期氣氛，往上超車是好兆頭，往下被超車是警訊。"},
+ {cat:"技術分析",zh:"支撐／壓力",en:"Support / Resistance",icon:"🧱",def:"支撐＝股價跌到這附近常常「跌不下去」的價位；壓力＝漲到這附近常常「漲不上去」的價位。",eg:"支撐像地板，跌到那會被接住；壓力像天花板，漲到那會被卡住。撞破天花板或踩破地板，常會繼續往那個方向走。"},
+ {cat:"技術分析",zh:"MACD",en:"MACD",icon:"🚗",def:"一個幫你判斷「漲跌力道有沒有變強」的工具。圖下方的柱子由綠翻紅，代表力道往上轉強；由紅翻綠，代表往下轉弱。",eg:"像汽車的油門感應器：不只看車有沒有在動，還告訴你正在加速還是在踩煞車。"},
+ {cat:"技術分析",zh:"KD 指標",en:"Stochastic (KD)",icon:"🌡️",def:"用0到100的數字，看股價最近是「買過頭」還是「賣過頭」。超過80代表大家搶太兇（可能要回檔），低於20代表賣太慘（可能要反彈）。",eg:"像體溫計：太高（>80）代表過熱該降溫，太低（<20）代表過冷可能要回暖。"},
+ {cat:"技術分析",zh:"RSI",en:"RSI",icon:"🔋",def:"和KD類似，用一個數字看股價是被買太多還是賣太多。一般高於70叫過熱，低於30叫過冷。",eg:"像手機電量：快滿(>70)再充意義不大，快沒電(<30)反而是該補的時候。"},
+ {cat:"技術分析",zh:"布林通道",en:"Bollinger Bands",icon:"🏞️",def:"以平均線為中線，上下各畫一條線形成一個「通道」，股價多半在通道裡跑。貼著上緣偏強、貼著下緣偏弱；通道變很窄，常代表接下來要有大動作。",eg:"像河堤夾出的河道，水通常在中間流；河道突然收窄，水流就要變湍急（變盤）。"},
+ {cat:"技術分析",zh:"背離",en:"Divergence",icon:"🥵",def:"股價創了新高，但成交量或指標卻沒跟上、反而變弱，代表「表面在漲、實際後繼無力」，是可能反轉的警訊。",eg:"像一個人嘴上喊衝、腳步卻越來越慢，看起來還在前進，其實快撐不住了。"},
+ {cat:"技術分析",zh:"型態",en:"Chart Patterns",icon:"☁️",def:"很多根K線排出來的「圖形」，老手會用形狀猜走勢。例如像兩座山的「頭肩頂」常代表要跌，像英文W的「W底」常代表要漲。",eg:"像看雲的形狀猜天氣，特定圖案出現時，市場常會走出類似的劇情。"},
+
+ // ── 基本面 / 財報 ──
+ {cat:"基本面/財報",zh:"EPS（每股盈餘）",en:"EPS",icon:"🪙",def:"公司賺的錢平分到「每一股」是多少，用來看這家公司會不會賺錢。數字越大代表每股越會生錢。",formula:"EPS = 公司賺的錢 ÷ 總股數",eg:"全班合資開店賺了100萬、分成100份，每份分到1萬，這「1萬」就是每股的賺錢能力。"},
+ {cat:"基本面/財報",zh:"本益比",en:"P/E",icon:"⏳",def:"用現在的股價，算「假設公司每年都賺這麼多，幾年能回本」。數字小通常較便宜，數字大代表貴、或大家很期待它未來會更好。",formula:"本益比 = 股價 ÷ 每股賺的錢(EPS)",eg:"花100元買的店，一年幫你賺10元，要10年回本，本益比就是10。一年賺20元只要5年回本就更划算。"},
+ {cat:"基本面/財報",zh:"股價淨值比",en:"P/B",icon:"🪑",def:"把股價拿來和公司「拆掉變現後每股值多少家當」比較。常用在資產很多的公司。低於1代表股價比帳面家當還便宜。",formula:"股價淨值比 = 股價 ÷ 每股淨值（每股的家當）",eg:"一間店把桌椅設備全賣掉每股值20元，但股價只賣18元，等於用打折價買它的全部家當。"},
+ {cat:"基本面/財報",zh:"ROE",en:"ROE",icon:"💼",def:"公司用「股東的錢」去賺錢的效率。投入100元一年生出15元，效率就是15%。長期都有15%以上通常是好公司。",formula:"ROE = 公司賺的錢 ÷ 股東投入的錢",eg:"兩個朋友各拿100萬創業，A一年賺15萬、B只賺5萬，A把錢用得更會生錢，就是ROE高。"},
+ {cat:"基本面/財報",zh:"毛利率",en:"Gross Margin",icon:"🧋",def:"賣一件東西，扣掉它的「製造或進貨成本」後，能留下幾%。越高代表產品越好賺、越有競爭力。",formula:"毛利率 =（售價 − 成本）÷ 售價",eg:"一杯珍奶賣50元，原料20元，賺30元、毛利率60%；如果原料漲到40元只賺10元，這生意就難做了。"},
+ {cat:"基本面/財報",zh:"營業利益率",en:"Operating Margin",icon:"🧾",def:"在毛利的基礎上，再扣掉店租、人事、水電等「營運開銷」後，本業還能留下幾%。看的是「正業」賺不賺錢。",eg:"珍奶賺的30元，付完店租員工薪水後只剩10元，這10元才是真正靠賣飲料賺到的。"},
+ {cat:"基本面/財報",zh:"營收",en:"Revenue",icon:"💰",def:"公司賣東西「總共收進來多少錢」（還沒扣成本）。台股每月10號前會公布上個月營收，是看公司生意有沒有變好的早期訊號。",eg:"店家當月的「總營業額」。連續幾個月營業額越來越高，通常代表生意正在變好。"},
+ {cat:"基本面/財報",zh:"財報三表",en:"Financial Statements",icon:"🩺",def:"看公司體質的三張表：損益表（這段期間賺賠多少）、資產負債表（手上有多少家當、欠多少債）、現金流量表（現金實際進出多少）。三張一起看才準。",eg:"像健檢報告：一張看收入支出，一張看身家負債，一張看錢包現金，缺一張都看不出全貌。"},
+ {cat:"基本面/財報",zh:"自由現金流",en:"Free Cash Flow",icon:"👛",def:"公司做完生意、也付完該花的設備投資後，「真正剩在口袋、可自由運用的現金」。比帳面上的獲利更難灌水。",eg:"月薪5萬聽起來不錯，但付完房貸車貸後實際只剩8千能花，這8千才是你真正能動用的錢。"},
+ {cat:"基本面/財報",zh:"負債比",en:"Debt Ratio",icon:"🏠",def:"公司的家當裡，有多少比例是「借來的」。太高代表欠太多、抗風險能力差，景氣一差就容易出事。",eg:"買500萬的房子自備100萬、貸款400萬，負債比就高；一旦失業沒收入，壓力就很大。"},
+
+ // ── 交易實務 ──
+ {cat:"交易實務",zh:"開戶",en:"Account Opening",icon:"🎮",def:"買股票前要先去券商（買賣股票的店家）辦一個帳戶，再連結一個銀行戶頭付款。可臨櫃或用手機線上辦，辦好就能下單。",eg:"像玩線上遊戲前要先「註冊帳號＋綁定付款」，弄好才能開始買裝備。"},
+ {cat:"交易實務",zh:"市價單／限價單",en:"Market / Limit Order",icon:"🛒",def:"市價單＝「不管多少錢，現在馬上幫我買到」；限價單＝「我只願出這個價，到價才成交」。",eg:"市價單像進店說「這個我要，現在就結帳」；限價單像說「降到90元我才買」，沒降到就不買。"},
+ {cat:"交易實務",zh:"當沖",en:"Day Trading",icon:"⚡",def:"同一天「買進又賣出」同一檔股票賺中間差價，收盤前出清不留到隔天。賺賠都快、風險很高，新手不建議碰。",eg:"像早上低價批貨、下午就想加價賣掉賺差價，眼光一錯當天就賠錢，刺激但危險。"},
+ {cat:"交易實務",zh:"融資／融券",en:"Margin / Short",icon:"🎲",def:"融資＝「借錢買股」，賭它會漲；融券＝「先借股票賣掉」，賭它會跌、之後低價買回還。兩者都是借來的，賺賠都被放大，還要付利息。",eg:"融資像借錢加碼下注，賭對賺更多、賭錯賠更慘；都是把風險放大的玩法。"},
+ {cat:"交易實務",zh:"停損／停利",en:"Stop Loss / Take Profit",icon:"🛑",def:"事先講好的「出場規則」。跌到某個價就認賠賣出（停損，避免越賠越多）；漲到某個價就獲利了結（停利，把賺到的鎖住）。",eg:"像賭場先設好「輸到這就走、贏到這就收」，避免一時上頭把錢全輸光或賺了又吐回去。"},
+ {cat:"交易實務",zh:"交易成本",en:"Transaction Cost",icon:"✂️",def:"買賣股票要付的「手續費」，賣出時政府還會收一筆「證交稅」。交易越頻繁、被扣掉的越多，會吃掉你的獲利。",eg:"像每次買賣都要給仲介一點抽成，買一次賣一次就被抽兩次，做太多趟賺的都進別人口袋。"},
+ {cat:"交易實務",zh:"T+2 交割",en:"Settlement",icon:"📅",def:"今天買股票，不是當天付錢，而是「第2個上班日」才從你帳戶扣款。所以買之前要確定帳戶到時有足夠的錢，不然會違約。",eg:"像先點餐吃飯、後天才結帳，但結帳日錢包一定要有錢，沒錢就麻煩大了。"},
+ {cat:"交易實務",zh:"定期定額",en:"Dollar-Cost Averaging",icon:"🥬",def:"固定時間（例如每月）投入固定金額去買，不管當時貴或便宜。長期下來成本被平均掉，適合懶人和新手。",eg:"像每月固定買1000元的菜，貴時少買一點、便宜時多買一點，平均下來不會買在最貴的那天。"},
+ {cat:"交易實務",zh:"資產配置",en:"Asset Allocation",icon:"🍱",def:"把錢分散放在不同類型（股票、債券、現金等），依自己能承受多少風險決定比例，避免全押一種。",eg:"像營養均衡的便當，不會整盒都是炸的，菜、肉、飯都來一點，整體才穩。"},
+ {cat:"交易實務",zh:"分散風險",en:"Diversification",icon:"🥚",def:"不要把錢全壓在一檔股票或一個產業，分開來放，這樣其中一個出事，也不會把你整副身家拖垮。",eg:"「雞蛋不要放同一個籃子」：一個籃子打翻了，其他籃子的蛋還在。"},
+
+ // ── 投資判斷 ──
+ {cat:"投資判斷",zh:"基本面分析",en:"Fundamental Analysis",icon:"🏡",def:"看公司本身賺不賺錢、體質好不好、產業有沒有前景，來判斷「這家公司值不值得買、合理價多少」。適合放比較久的人。",eg:"像買房前研究地段、屋況、學區，看的是這間房本身好不好，而不是這禮拜誰在搶。"},
+ {cat:"投資判斷",zh:"技術面分析",en:"Technical Analysis",icon:"🏄",def:"從股價走勢圖和成交量，判斷「現在是不是好的進場或出場時機」。適合做短中期的人。",eg:"像衝浪看浪的形狀和時機，決定何時跳上去、何時收手，看的是節奏不是海水成分。"},
+ {cat:"投資判斷",zh:"籌碼面分析",en:"Chip Analysis",icon:"🛒",def:"觀察「大資金在買還是在賣」。看外資、投信這些法人（用別人的錢操盤的大機構）和大戶的買賣動向，跟著大錢的方向。",eg:"像看大賣場進貨量：大盤商開始大量進某樣商品，通常嗅到了什麼，散戶可以參考風向。"},
+ {cat:"投資判斷",zh:"護城河",en:"Economic Moat",icon:"🏰",def:"公司「別人很難搶走它生意」的本事，例如名氣、獨家技術、規模大到沒人拼得過。有護城河的公司賺錢比較穩、比較久。",eg:"像城堡外的護城河，敵人（競爭對手）很難攻進來；可口可樂的品牌、台積電的技術，都是又寬又深的護城河。"},
+ {cat:"投資判斷",zh:"安全邊際",en:"Margin of Safety",icon:"🌉",def:"用「明顯比它真正價值還低」的價格買進，留一點犯錯的空間，就算判斷有點失誤也不容易賠大錢。",eg:"一座橋限重10噸，你只讓5噸的車過，留一倍餘裕；買股也一樣，值100元的東西用70元買，更安心。"},
+ {cat:"投資判斷",zh:"複利",en:"Compound Interest",icon:"❄️",def:"賺到的錢再投入去滾，利上加利，時間越久雪球滾越大，被稱為世界第八大奇蹟。",formula:"72法則：72 ÷ 年報酬率 ≈ 翻倍要幾年",eg:"年賺10%，本金大約7年翻一倍、14年變4倍。重點不是賺很快，而是讓它一直滾下去。"},
+ {cat:"投資判斷",zh:"波動率",en:"Volatility",icon:"🎢",def:"股價上下「晃得多劇烈」。晃得兇代表機會大、但嚇人也容易賠；晃得小代表平穩、但賺得慢。",eg:"像兩種遊樂設施：雲霄飛車（高波動）又刺激又可怕，旋轉木馬（低波動）平穩但無聊。"},
+ {cat:"投資判斷",zh:"Beta 值",en:"Beta",icon:"🚶",def:"這檔股票相對於大盤「跟漲跟跌的敏感度」。大於1代表大盤動它動更兇，小於1代表它比較穩、比較抗跌。",eg:"大盤是大隊伍，Beta大的像走最外圈的人，隊伍稍微轉彎他就要狂奔；Beta小的走內圈，慢慢走就好。"},
+ {cat:"投資判斷",zh:"買進前檢查清單",en:"Checklist",icon:"✅",def:"下單前先自問六題，全部過關再買：①公司持續有賺錢嗎？②欠債會不會太多、現金夠不夠？③這個產業有未來嗎？④現在價格合理還是太貴？⑤我真的看得懂這家公司嗎？⑥如果看錯，我打算跌到哪就賣？",eg:"「看不懂的不要買，沒想好何時退場就不要進場」——這兩句記住，能少賠很多冤枉錢。"},
+ {cat:"投資判斷",zh:"去哪找最新資訊",en:"Where to Find Data",icon:"📑",def:"官方又免費的來源：證交所網站（twse.com.tw）、公開資訊觀測站（mops.twse.com.tw）可查財報和每月營收；即時報價和籌碼可看Yahoo股市、Goodinfo或券商App。公司重大消息以「公開資訊觀測站」公告為準。",eg:"想知道一家店的真實狀況，看官方財報像看政府登記資料，比聽路邊消息可靠多了。"},
+
+ // ── 盤中口語 ──
+ {cat:"盤中口語",zh:"加權點數",en:"Index Points",icon:"📈",def:"就是「大盤指數」的數字。新聞說「大盤漲100點」，指的就是這個整體指數上漲100點，代表今天股市整體偏強。",eg:"像全班平均分數從90分變成92分，漲了2分；加權漲100點就是股市整體今天考好了一點。"},
+ {cat:"盤中口語",zh:"買壓／賣壓",en:"Buying / Selling Pressure",icon:"🎫",def:"買壓＝想買的人很多、力道強，把股價往上推；賣壓＝想賣的人很多、力道強，把股價往下壓。",eg:"像演唱會搶票：搶的人爆多（買壓強）票價就飆；大家都想退票（賣壓重）價格就崩。常聽到「上面賣壓很重」就是某價位有一堆人等著賣。"},
+ {cat:"盤中口語",zh:"大戶廝殺",en:"Big Players Battle",icon:"🐘",def:"形容好幾個「大資金」（主力、法人、有錢大戶）互相在那邊大買大賣對打，把股價殺得忽上忽下，小散戶常被甩來甩去甩出場。",eg:"像兩隻大象在打架，旁邊的小草（散戶）不管站哪邊都被踩得東倒西歪。"},
+ {cat:"盤中口語",zh:"主力／散戶／韭菜",en:"Whale / Retail / Leek",icon:"🌿",def:"主力＝有大錢、能影響股價的大戶或機構；散戶＝你我這種小額投資人；「韭菜」是自嘲散戶常被收割——追在高點買、殺在低點賣，被大戶賺走。",eg:"韭菜割了會再長、長了又被割，形容散戶一再重複被坑卻學不乖。"},
+ {cat:"盤中口語",zh:"洗盤",en:"Shakeout",icon:"🚿",def:"主力故意把股價弄跌或上下震，把意志不堅的散戶「嚇到賣掉」，他好趁低價把股票收進來，之後再往上拉。",eg:"像店家故意放假消息說要倒了，膽小的客人退訂，老闆趁機低價收回好貨，之後再大賺。"},
+ {cat:"盤中口語",zh:"軋空",en:"Short Squeeze",icon:"⚽",def:"那些「賭它跌、先借股票賣掉」的人（放空者），結果股價偏偏不跌反漲，他們怕賠更多只好認賠買回，這些買回又把股價推更高，越漲越逼人。",eg:"像賭球隊會輸的人，球隊卻一直贏，他們只好趕快認輸付錢，反而把賠率越推越誇張。"},
+ {cat:"盤中口語",zh:"多殺多",en:"Long Liquidation",icon:"🚪",def:"原本一群看好、買進的人，突然集體恐慌、搶著賣出，自己人砍自己人，股價就急速下殺。",eg:"像戲院有人喊失火，明明大家都是觀眾，卻互相推擠搶著逃，場面瞬間失控。"},
+ {cat:"盤中口語",zh:"摜壓／摜殺",en:"Dumping",icon:"📦",def:"用一大筆賣單「往下砸」、硬把股價壓低，常是大戶在出貨或故意打壓。",eg:"像把一大箱貨狠狠摔到地上，價格瞬間被砸下來。"},
+ {cat:"盤中口語",zh:"拉尾盤／殺尾盤",en:"Late Rally / Sell-off",icon:"⏰",def:"快收盤前（接近下午1點）突然把股價拉高叫「拉尾盤」，突然壓低叫「殺尾盤」，常是為了做出漂亮或難看的收盤價、影響隔天氣氛。",eg:"像考試最後一分鐘狂塗答案卡，想把最終成績（收盤價）做成自己要的樣子。"},
+ {cat:"盤中口語",zh:"噴出／噴",en:"Breakout Surge",icon:"🥤",def:"股價突然又快又猛地往上衝、漲一大段，通常伴隨大量買盤。",eg:"像汽水搖一搖打開瞬間噴出來，又急又猛。"},
+ {cat:"盤中口語",zh:"跳空",en:"Gap",icon:"🪜",def:"今天「開盤價」直接高過昨天最高點（往上跳空），或低於昨天最低點（往下跳空），中間沒成交、線圖上留個缺口，代表多空力量很強烈。",eg:"像爬樓梯沒一階一階走，直接跳上去或跳下來一大段，力道很猛。"},
+ {cat:"盤中口語",zh:"套牢／解套",en:"Trapped / Break Even",icon:"🔒",def:"買了之後股價跌，現在賣會賠，只好抱著等，叫「套牢」；後來漲回你的成本、終於能不賠賣出，叫「解套」。",eg:"像高點買的東西現在賣會虧，只能放著等它漲回原價，等到了才鬆口氣。"},
+ {cat:"盤中口語",zh:"攤平",en:"Averaging Down",icon:"⚖️",def:"股價跌了之後「再買一些」，讓你的平均成本變低。買對能省錢，但如果它繼續跌，會越攤越多、越陷越深。",eg:"100元買一張、跌到80元再買一張，平均成本變90元；但要是跌到50元，你就套更多錢進去了。"},
+ {cat:"盤中口語",zh:"追高殺低",en:"Chasing / Panic Selling",icon:"🏃",def:"看到大漲才急著追買、看到大跌才嚇到賣出。這是散戶最常犯、也最容易賠錢的行為——剛好買在貴的、賣在便宜的。",eg:"像排隊名店看人多就跟著搶、看到沒人就急著退，結果每次都買貴賣便宜。"},
+ {cat:"盤中口語",zh:"抬轎／倒貨",en:"Riding / Unloading",icon:"🛕",def:"散戶在高檔買進、把股價越推越高，等於「幫主力抬轎」；主力趁這時把手上股票賣給散戶，叫「倒貨／出貨」。",eg:"像主力坐在轎子上，散戶搶著抬他往上爬，爬到頂主力跳下來、把轎子（股票）丟給你。"},
+ {cat:"盤中口語",zh:"接刀",en:"Catching a Falling Knife",icon:"🔪",def:"股價正在急殺往下時搶著進場買，想撿便宜（抄底），結果它繼續跌，反被套住，像徒手去接掉下來的刀。",eg:"刀子掉下來別用手接，等它落地（止跌）再撿才安全；股價急跌時搶買常常見血。"},
+ {cat:"盤中口語",zh:"護盤",en:"Market Support",icon:"🛟",def:"股價在跌時，有人進場大買去「撐住」價位不讓它再跌。可能是主力、公司本身、或政府的基金（國安基金）出手穩定市場。",eg:"像快倒的牆，有人趕緊用身體頂著不讓它垮下去。"},
+ {cat:"盤中口語",zh:"鎖漲停／鎖跌停",en:"Locked Limit",icon:"🔐",def:"漲停（漲到上限）後一堆人搶買、買不到，價位卡住不動，叫「鎖漲停」；跌停（跌到下限）後一堆人想賣、賣不掉，叫「鎖跌停」。",eg:"鎖漲停像熱門商品秒殺、想買排不到；鎖跌停像燙手山芋，想丟卻沒人接。"},
+ {cat:"盤中口語",zh:"量縮／量增",en:"Volume Down / Up",icon:"👥",def:"成交量比之前明顯變少叫「量縮」（大家在觀望、沒人氣）；明顯變多叫「量增」（很多人在買賣、有資金進出）。",eg:"像店裡客人變少（量縮）代表冷清；突然客滿（量增）代表有事發生、人氣回來了。"},
+ {cat:"盤中口語",zh:"開高走低／開低走高",en:"Open High Close Low",icon:"🍬",def:"開高走低＝開盤拉很高、但之後一路往下，代表賣壓重、其實偏弱；開低走高＝開盤低、但越走越強，代表買盤強、偏好。",eg:"開高走低像虎頭蛇尾，一開始很猛後繼無力；開低走高像倒吃甘蔗，越來越甜。"},
+];
+
+const QUIZ = [
+ {q:"「本益比」白話講是？",opts:["幾年能回本","公司欠多少債","一天漲跌幾%","發多少股利"],a:0,exp:"本益比 = 股價 ÷ 每股賺的錢，等於「假設每年都賺這麼多，幾年回本」。數字小通常較便宜。"},
+ {q:"短期均線由下往上穿過長期均線，叫什麼、代表什麼？",opts:["死亡交叉，偏壞","黃金交叉，偏好","背離，要反轉","跳空，力道強"],a:1,exp:"黃金交叉＝近期氣氛往上超車長期，偏好的訊號；反過來往下穿是死亡交叉。"},
+ {q:"用「雞蛋不要放同一個籃子」形容的是？",opts:["停損","分散風險","當沖","融資"],a:1,exp:"分散風險＝錢分開放在不同股票或產業，一個出事不會拖垮全部。"},
+ {q:"KD 指標的K值高於80，比較像下列哪個情況？",opts:["體溫過低該回暖","買過頭、可能要回檔","公司虧錢","成交量變少"],a:1,exp:"KD像體溫計，>80代表大家搶太兇、過熱，可能要降溫(回檔)；<20代表賣過頭可能反彈。"},
+ {q:"「停損」是在做什麼？",opts:["跌到設定價就認賠賣出","借錢買更多","當天買賣賺差價","把賺的錢再投入"],a:0,exp:"停損是事先講好的退場規則，跌到某價就賣，避免越賠越多。"},
+ {q:"今天買台股，什麼時候會從帳戶扣款？",opts:["當天","第2個上班日(T+2)","隔週","下個月"],a:1,exp:"台股是T+2交割，第2個上班日才扣款，所以扣款日帳戶要有足夠的錢。"},
+ {q:"ROE 高代表什麼？",opts:["股價很貴","用股東的錢賺錢效率高","欠債很多","波動很大"],a:1,exp:"ROE＝賺的錢÷股東投入的錢，越高代表錢被用得越會生錢，長期>15%通常是好公司。"},
+ {q:"「自由現金流」像生活中的哪個概念？",opts:["月薪總額","付完房貸車貸後實際剩能花的錢","信用卡額度","存款利息"],a:1,exp:"自由現金流＝做完生意、付完該花的之後真正剩在口袋的現金，比帳面獲利更難灌水。"},
+ {q:"散戶「追高殺低」是指？",opts:["買在貴、賣在便宜","低買高賣","長期持有","定期定額"],a:0,exp:"看到大漲才追買、看到大跌才嚇賣，剛好買貴賣便宜，是最常見的賠錢行為。"},
+ {q:"放空的人因股價不跌反漲、被迫認賠買回而越推越高，叫？",opts:["軋空","洗盤","護盤","跳空"],a:0,exp:"軋空＝賭跌的人被漲勢逼著回補，回補的買盤又把價格推更高。"},
+];
+
+// ===== 學習模式 =====
+const cats=["全部",...[...new Set(DATA.map(d=>d.cat))]];
+let curCat="全部", kw="";
+const tabsEl=document.getElementById('tabs');
+const listEl=document.getElementById('list');
+const countEl=document.getElementById('count');
+
+cats.forEach((c,i)=>{
+  const b=document.createElement('button');
+  b.className='tab'+(i===0?' active':''); b.textContent=c;
+  b.onclick=()=>{curCat=c;[...tabsEl.children].forEach(x=>x.classList.remove('active'));b.classList.add('active');render();};
+  tabsEl.appendChild(b);
+});
+
+function render(){
+  const q=kw.trim().toLowerCase();
+  const items=DATA.filter(d=>(curCat==="全部"||d.cat===curCat)&&
+    (!q||d.zh.toLowerCase().includes(q)||d.en.toLowerCase().includes(q)||d.def.toLowerCase().includes(q)));
+  countEl.textContent=`共 ${items.length} 個名詞`;
+  if(!items.length){listEl.innerHTML='<div class="empty">找不到符合的名詞 🔍<br>換個關鍵字試試</div>';return;}
+  listEl.innerHTML=items.map(d=>`
+    <div class="card">
+      <h3>${d.zh}<span class="en">${d.en}</span><span class="cat-pill">${d.cat}</span></h3>
+      <p>${d.def}</p>
+      ${d.formula?`<div class="formula">📐 <b>算法</b>：${d.formula}</div>`:''}
+      ${d.eg?`<div class="eg"><span class="ico">${d.icon||'🌱'}</span><span class="txt"><b>生活例子</b>：${d.eg}</span></div>`:''}
+    </div>`).join('');
+}
+document.getElementById('search').addEventListener('input',e=>{kw=e.target.value;render();});
+render();
+
+// ===== 模式切換 =====
+const learnView=document.getElementById('learnView');
+const quizView=document.getElementById('quizView');
+document.querySelectorAll('.mode-btn').forEach(b=>{
+  b.onclick=()=>{
+    document.querySelectorAll('.mode-btn').forEach(x=>x.classList.remove('active'));
+    b.classList.add('active');
+    if(b.dataset.mode==='quiz'){learnView.style.display='none';quizView.style.display='block';tabsEl.style.display='none';startQuiz();}
+    else{quizView.style.display='none';learnView.style.display='block';tabsEl.style.display='flex';}
+  };
+});
+
+// ===== 測驗模式 =====
+let qi=0,score=0,order=[];
+function startQuiz(){qi=0;score=0;order=[...QUIZ.keys()].sort(()=>Math.random()-0.5);showQ();}
+function showQ(){
+  if(qi>=order.length){
+    quizView.innerHTML=`<div class="quizbox score">
+      <div>測驗完成 🎉</div>
+      <div class="big">${score} / ${order.length}</div>
+      <div style="color:var(--sub);margin-top:6px">${score===order.length?'滿分！觀念非常扎實':score>=order.length*0.6?'不錯，再複習弱點即可':'建議回到學習模式再讀一遍'}</div>
+      <button class="retry" onclick="startQuiz()">再測一次</button></div>`;
+    return;
+  }
+  const item=QUIZ[order[qi]];
+  const opts=item.opts.map((o,i)=>`<button class="opt" data-i="${i}">${o}</button>`).join('');
+  quizView.innerHTML=`<div class="quizbox">
+    <div class="q-prog">第 ${qi+1} / ${order.length} 題　·　目前得分 ${score}</div>
+    <div class="q-text">${item.q}</div>
+    <div id="opts">${opts}</div>
+    <div class="q-exp" id="exp"></div>
+    <button class="q-next" id="next">下一題 →</button></div>`;
+  document.querySelectorAll('.opt').forEach(btn=>{
+    btn.onclick=()=>{
+      const pick=+btn.dataset.i;
+      document.querySelectorAll('.opt').forEach(b=>{b.disabled=true;
+        if(+b.dataset.i===item.a)b.classList.add('correct');});
+      if(pick!==item.a)btn.classList.add('wrong'); else score++;
+      const exp=document.getElementById('exp');exp.style.display='block';exp.innerHTML='✅ '+item.exp;
+      document.getElementById('next').style.display='block';
+    };
+  });
+  document.getElementById('next').onclick=()=>{qi++;showQ();};
+}
+</script>
+</body>
+</html>
