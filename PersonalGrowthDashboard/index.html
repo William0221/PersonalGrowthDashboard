@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>成長儀表板 | Personal Growth Hub</title>
+  <meta name="description" content="整合情商訓練、技術學習、技術新聞的個人成長儀表板" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#0a0d1a" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="成長Hub" />
+  <link rel="apple-touch-icon" href="icon-192.png" />
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+<!-- ====== MOBILE HAMBURGER ====== -->
+<button class="hamburger" id="hamburgerBtn" aria-label="開啟選單">☰</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- ====== SIDEBAR ====== -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-icon">🚀</div>
+    <div>
+      <div class="logo-text">成長儀表板</div>
+      <div class="logo-sub">Personal Growth Hub</div>
+    </div>
+  </div>
+
+  <div class="nav-group-label">主要功能</div>
+
+  <div class="nav-item active" data-page="dashboard" id="nav-dashboard">
+    <span class="nav-icon">📊</span> 首頁
+  </div>
+  <div class="nav-item" data-page="eq" id="nav-eq">
+    <span class="nav-icon">🧠</span> EQ 情商訓練
+  </div>
+  <div class="nav-item" data-page="tech" id="nav-tech">
+    <span class="nav-icon">💻</span> 技術學習
+    <span class="nav-badge" id="challengeBadge">今日</span>
+  </div>
+  <div class="nav-item" data-page="news" id="nav-news">
+    <span class="nav-icon">📰</span> 技術新聞
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="streak-badge">
+      🔥 <span id="streakDisplay">0</span> 天連續學習
+    </div>
+  </div>
+</aside>
+
+<!-- ====== MAIN CONTENT ====== -->
+<main class="main">
+
+  <!-- ========== DASHBOARD ========== -->
+  <section class="page active" id="page-dashboard">
+    <div class="greeting-card">
+      <div class="greeting-text">
+        <h2 id="greetingText">你好！</h2>
+        <p>今天也繼續進步，堅持就是勝利 💪</p>
+      </div>
+      <div class="date-display">
+        <span class="date-big" id="dateDay">--</span>
+        <span id="dateStr">----</span>
+      </div>
+    </div>
+
+    <!-- Stat cards -->
+    <div class="grid-4 section-gap">
+      <div class="stat-card blue">
+        <div class="stat-icon blue">🔥</div>
+        <div class="stat-value" id="statStreak">0</div>
+        <div class="stat-label">連續天數</div>
+      </div>
+      <div class="stat-card purple">
+        <div class="stat-icon purple">🧠</div>
+        <div class="stat-value" id="statEQ">0</div>
+        <div class="stat-label">EQ 練習次數</div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-icon green">💻</div>
+        <div class="stat-value" id="statTech">0</div>
+        <div class="stat-label">技術題完成</div>
+      </div>
+      <div class="stat-card orange">
+        <div class="stat-icon orange">📰</div>
+        <div class="stat-value" id="statNews">0</div>
+        <div class="stat-label">閱讀文章</div>
+      </div>
+    </div>
+
+    <div class="grid-2 section-gap">
+      <!-- Mood -->
+      <div class="card">
+        <div class="card-title">😊 今日情緒</div>
+        <div class="mood-selector" id="moodSelector">
+          <button class="mood-btn" data-mood="😄" data-label="很好">😄 <span>很好</span></button>
+          <button class="mood-btn" data-mood="🙂" data-label="還好">🙂 <span>還好</span></button>
+          <button class="mood-btn" data-mood="😐" data-label="普通">😐 <span>普通</span></button>
+          <button class="mood-btn" data-mood="😔" data-label="低落">😔 <span>低落</span></button>
+          <button class="mood-btn" data-mood="😤" data-label="煩躁">😤 <span>煩躁</span></button>
+          <button class="mood-btn" data-mood="😰" data-label="焦慮">😰 <span>焦慮</span></button>
+        </div>
+        <div class="mt-12 text-sm text-muted" id="moodSaved"></div>
+      </div>
+
+      <!-- Quote -->
+      <div class="quote-card">
+        <div class="card-title">✨ 今日金句</div>
+        <div class="quote-text" id="quoteText">正在載入...</div>
+        <div class="quote-author" id="quoteAuthor">—</div>
+      </div>
+    </div>
+
+    <!-- Today Tasks -->
+    <div class="card section-gap">
+      <div class="flex-between mb-16">
+        <div class="card-title" style="margin:0">📋 今日學習任務</div>
+        <button class="btn btn-ghost text-sm" onclick="resetTodayTasks()" style="font-size:12px;padding:6px 12px">重設</button>
+      </div>
+      <div id="taskList"></div>
+    </div>
+
+    <!-- Progress -->
+    <div class="card">
+      <div class="card-title">📈 本週學習進度</div>
+      <div style="display:flex;flex-direction:column;gap:14px;margin-top:8px">
+        <div>
+          <div class="flex-between text-sm mb-4" style="margin-bottom:6px">
+            <span>EQ 情商訓練</span>
+            <span class="text-accent-blue" id="progEQ">0%</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" id="fillEQ" style="width:0%"></div></div>
+        </div>
+        <div>
+          <div class="flex-between text-sm mb-4" style="margin-bottom:6px">
+            <span>C# / .NET 技術</span>
+            <span class="text-accent-green" id="progCsharp">0%</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" id="fillCsharp" style="width:0%;background:var(--grad-green)"></div></div>
+        </div>
+        <div>
+          <div class="flex-between text-sm mb-4" style="margin-bottom:6px">
+            <span>JavaScript</span>
+            <span class="text-accent-purple" id="progJs">0%</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" id="fillJs" style="width:0%;background:var(--grad-purple)"></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== EQ LAB ========== -->
+  <section class="page" id="page-eq">
+    <div class="page-header">
+      <div class="page-title">🧠 EQ 情商訓練</div>
+      <div class="page-subtitle">透過職場情境練習，提升溝通力與情緒管理</div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="scenarios">💬 情境練習</button>
+      <button class="tab" data-tab="journal">📔 情緒日誌</button>
+      <button class="tab" data-tab="techniques">📚 溝通技巧</button>
+    </div>
+
+    <!-- Scenarios -->
+    <div class="tab-content active" id="tab-scenarios">
+      <div class="flex-between mb-16" style="margin-bottom:16px">
+        <div>
+          <div class="fw-700" id="scenarioChallengeTitle" style="margin-bottom:4px">今日情境挑戰</div>
+          <div class="text-sm text-muted" id="scenarioProgress">第 1 題，共 <span id="scenarioTotal">0</span> 題</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn btn-ghost" id="btnPrevScenario" onclick="prevScenario()" style="font-size:12px;padding:6px 12px">← 上一題</button>
+          <button class="btn btn-primary" id="btnBackToTodayScenario" onclick="backToTodayScenario()" style="font-size:12px;padding:6px 12px;display:none">🎯 回今日挑戰</button>
+          <button class="btn btn-ghost" id="btnShuffleScenario" onclick="shuffleScenario()" style="font-size:12px;padding:6px 12px;display:none;flex-shrink:0;white-space:nowrap">🔄 換一題</button>
+          <button class="btn btn-ghost" id="btnNextScenario" onclick="nextScenario()" style="font-size:12px;padding:6px 12px">下一題 →</button>
+        </div>
+      </div>
+      <div id="scenarioContainer"></div>
+      <div id="scenarioHistoryList"></div>
+    </div>
+
+    <!-- Journal -->
+    <div class="tab-content" id="tab-journal">
+      <div class="card journal-form section-gap">
+        <div class="card-title">📝 記錄今天的情緒</div>
+        <div class="form-group">
+          <label class="form-label">今天發生了什麼事？</label>
+          <textarea id="journalEvent" placeholder="描述讓你有情緒反應的事件..."></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">你的感受是？</label>
+          <textarea id="journalFeel" placeholder="我感到... 因為..." style="min-height:70px"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="form-label">如果重來一次，我會如何回應？</label>
+          <textarea id="journalReflect" placeholder="下次可以嘗試..." style="min-height:70px"></textarea>
+        </div>
+        <div class="flex gap-8" style="gap:8px">
+          <button class="btn btn-primary" onclick="saveJournal()">💾 儲存日誌</button>
+          <button class="btn btn-ghost" onclick="clearJournalForm()">清除</button>
+        </div>
+      </div>
+
+      <div class="card-title">📖 過往日誌</div>
+      <div class="journal-entries" id="journalEntries">
+        <div class="text-sm text-muted">尚無日誌記錄</div>
+      </div>
+    </div>
+
+    <!-- Techniques -->
+    <div class="tab-content" id="tab-techniques">
+      <div class="technique-grid" id="techniqueGrid"></div>
+    </div>
+  </section>
+
+  <!-- ========== TECH SKILLS ========== -->
+  <section class="page" id="page-tech">
+    <div class="page-header">
+      <div class="page-title">💻 技術學習</div>
+      <div class="page-subtitle">C#、.NET、JavaScript — 每日挑戰 + 結構化學習路徑</div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="challenge">🎯 每日挑戰</button>
+      <button class="tab" data-tab="csharp-path">🔷 C# / .NET 路徑</button>
+      <button class="tab" data-tab="js-path">🟡 JavaScript 路徑</button>
+    </div>
+
+    <!-- Challenge -->
+    <div class="tab-content active" id="tab-challenge">
+      <div class="flex-between mb-16" style="margin-bottom:16px">
+        <div>
+          <div class="fw-700" id="techChallengeTitle" style="margin-bottom:4px">今日程式題</div>
+          <div class="text-sm text-muted" id="challengeProgress">第 1 題</div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn btn-ghost" id="btnPrevChallenge" onclick="prevChallenge()" style="font-size:12px;padding:6px 12px">← 上一題</button>
+          <button class="btn btn-primary" id="btnBackToTodayChallenge" onclick="backToTodayChallenge()" style="font-size:12px;padding:6px 12px;display:none">🎯 回今日挑戰</button>
+          <button class="btn btn-ghost" id="btnShuffleChallenge" onclick="shuffleChallenge()" style="font-size:12px;padding:6px 12px;display:none;flex-shrink:0;white-space:nowrap">🔄 換一題</button>
+          <button class="btn btn-ghost" id="btnNextChallenge" onclick="nextChallenge()" style="font-size:12px;padding:6px 12px">下一題 →</button>
+        </div>
+      </div>
+      <div id="challengeContainer"></div>
+      <div id="challengeHistoryList"></div>
+    </div>
+
+    <!-- C# Path -->
+    <div class="tab-content" id="tab-csharp-path">
+      <div id="csharpPath"></div>
+    </div>
+
+    <!-- JS Path -->
+    <div class="tab-content" id="tab-js-path">
+      <div id="jsPath"></div>
+    </div>
+  </section>
+
+  <!-- ========== TECH PULSE ========== -->
+  <section class="page" id="page-news">
+    <div class="page-header">
+      <div class="flex-between">
+        <div>
+          <div class="page-title">📰 技術新聞</div>
+          <div class="page-subtitle">自動彙整最新 .NET、JavaScript、IT 技術資訊</div>
+        </div>
+        <button class="btn btn-primary" onclick="loadNews(true)" id="refreshBtn">🔄 重新載入</button>
+      </div>
+    </div>
+
+    <div class="news-filters">
+      <button class="filter-btn active" data-filter="all" onclick="filterNews('all',this)">全部</button>
+      <button class="filter-btn" data-filter=".NET" onclick="filterNews('.NET',this)">.NET</button>
+      <button class="filter-btn" data-filter="JavaScript" onclick="filterNews('JavaScript',this)">JavaScript</button>
+      <button class="filter-btn" data-filter="IT時事" onclick="filterNews('IT時事',this)">IT 時事</button>
+    </div>
+
+    <div id="newsContainer">
+      <div class="news-loading">
+        <div class="spinner"></div>
+        正在載入最新技術新聞...
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- Mobile nav -->
+<nav class="mobile-nav" id="mobileNav">
+  <div class="mobile-nav-item active" data-page="dashboard"><span class="m-icon">📊</span>首頁</div>
+  <div class="mobile-nav-item" data-page="eq"><span class="m-icon">🧠</span>EQ 訓練</div>
+  <div class="mobile-nav-item" data-page="tech"><span class="m-icon">💻</span>技術</div>
+  <div class="mobile-nav-item" data-page="news"><span class="m-icon">📰</span>新聞</div>
+</nav>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- ============================================================
+     JAVASCRIPT
+============================================================ -->
+  <script src="js/data.js"></script>
+  <script src="js/data-extra.js"></script>
+  <script src="js/app.js"></script>
+  <script>
+    /* 註冊 Service Worker（離線快取 / 可安裝）。需經 https 或 localhost 才會生效 */
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').catch((e) => console.warn('SW 註冊失敗:', e));
+      });
+    }
+  </script>
+</body>
+</html>
