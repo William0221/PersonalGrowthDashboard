@@ -1,0 +1,1588 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>自然百科 — 魚．植物．中藥</title>
+<style>
+  :root{
+    --bg:#f4f1ea; --card:#fffdf8; --ink:#2f3a33; --sub:#6b7a6f;
+    --line:#e2dccd; --shadow:0 4px 18px rgba(60,70,55,.10);
+    --fish:#2f7fa8; --fish-bg:#e7f2f8;
+    --plant:#4a8a3c; --plant-bg:#eaf4e4;
+    --herb:#a8682f; --herb-bg:#f6ece0;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:"PingFang TC","Microsoft JhengHei","Noto Sans TC",sans-serif;
+    background:var(--bg);color:var(--ink);line-height:1.6;-webkit-font-smoothing:antialiased}
+  header{text-align:center;padding:34px 20px 18px}
+  header h1{font-size:30px;letter-spacing:2px;font-weight:800}
+  header p{color:var(--sub);margin-top:6px;font-size:15px}
+  .wrap{max-width:1080px;margin:0 auto;padding:0 18px 60px}
+
+  .controls{position:sticky;top:0;z-index:20;background:var(--bg);
+    padding:14px 0 12px;display:flex;flex-direction:column;gap:12px;align-items:center}
+  .search{width:100%;max-width:480px;position:relative}
+  .search input{width:100%;padding:12px 16px 12px 42px;border:1px solid var(--line);
+    border-radius:30px;font-size:15px;background:var(--card);color:var(--ink);outline:none}
+  .search input:focus{border-color:#bcae8e}
+  .search svg{position:absolute;left:15px;top:50%;transform:translateY(-50%);opacity:.45}
+  .tabs{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+  .tab{padding:8px 18px;border-radius:24px;border:1px solid var(--line);background:var(--card);
+    cursor:pointer;font-size:14px;font-weight:600;color:var(--sub);transition:.18s;user-select:none}
+  .tab:hover{transform:translateY(-1px)}
+  .tab.active{color:#fff}
+  .tab[data-cat="all"].active{background:#5b6b5e;border-color:#5b6b5e}
+  .tab[data-cat="fish"].active{background:var(--fish);border-color:var(--fish)}
+  .tab[data-cat="plant"].active{background:var(--plant);border-color:var(--plant)}
+  .tab[data-cat="herb"].active{background:var(--herb);border-color:var(--herb)}
+  .sortsel{padding:8px 14px;border-radius:24px;border:1px solid var(--line);background:var(--card);
+    color:var(--ink);font-size:14px;font-weight:600;cursor:pointer;outline:none}
+
+  .count{color:var(--sub);font-size:13px;text-align:center;margin:4px 0 14px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(225px,1fr));gap:16px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;overflow:hidden;
+    cursor:pointer;box-shadow:var(--shadow);transition:.2s;display:flex;flex-direction:column}
+  .card:hover{transform:translateY(-4px);box-shadow:0 10px 26px rgba(60,70,55,.16)}
+  .thumb{height:140px;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .thumb.fish{background:var(--fish-bg)} .thumb.plant{background:var(--plant-bg)} .thumb.herb{background:var(--herb-bg)}
+  .thumb .emoji{font-size:54px;line-height:1}
+  .thumb img{width:100%;height:100%;object-fit:cover;display:none}
+  .card-body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:6px}
+  .card h3{font-size:18px;font-weight:700}
+  .card .latin{font-size:12px;color:var(--sub);font-style:italic}
+  .pill{align-self:flex-start;font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px;margin-top:2px}
+  .pill.fish{background:var(--fish-bg);color:var(--fish)}
+  .pill.plant{background:var(--plant-bg);color:var(--plant)}
+  .pill.herb{background:var(--herb-bg);color:var(--herb)}
+  .card .teaser{font-size:13px;color:var(--sub)}
+  .card.dim{opacity:.42}
+  .empty{text-align:center;color:var(--sub);padding:60px 0;font-size:15px}
+
+  /* modal */
+  .overlay{position:fixed;inset:0;background:rgba(40,46,40,.55);display:none;
+    align-items:flex-start;justify-content:center;padding:30px 16px;z-index:50;overflow-y:auto}
+  .overlay.show{display:flex}
+  .modal{background:var(--card);border-radius:20px;max-width:580px;width:100%;
+    box-shadow:0 20px 60px rgba(0,0,0,.3);overflow:hidden;animation:pop .22s ease}
+  @keyframes pop{from{transform:scale(.96);opacity:0}to{transform:scale(1);opacity:1}}
+  .m-photo{height:200px;position:relative;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .m-photo.fish{background:linear-gradient(135deg,#2f7fa8,#4ba3c9)}
+  .m-photo.plant{background:linear-gradient(135deg,#4a8a3c,#73b85e)}
+  .m-photo.herb{background:linear-gradient(135deg,#a8682f,#c9914e)}
+  .m-photo .emoji{font-size:80px}
+  .m-photo img{width:100%;height:100%;object-fit:cover;display:none}
+  .m-credit{position:absolute;bottom:6px;right:10px;font-size:10px;color:#fff;opacity:.8;
+    background:rgba(0,0,0,.3);padding:2px 7px;border-radius:10px;display:none}
+  .close{position:absolute;top:14px;right:16px;font-size:24px;cursor:pointer;color:#fff;
+    width:34px;height:34px;border-radius:50%;background:rgba(0,0,0,.35);border:none;line-height:1}
+  .close:hover{background:rgba(0,0,0,.55)}
+  .modal-title{padding:18px 26px 0}
+  .modal-title h2{font-size:24px}
+  .modal-title .m-latin{font-style:italic;color:var(--sub);font-size:13px;margin-top:2px}
+  .modal-body{padding:18px 26px 26px}
+  .sec{margin-bottom:18px}
+  .sec:last-child{margin-bottom:0}
+  .sec h4{font-size:13px;font-weight:800;letter-spacing:1px;color:var(--sub);margin-bottom:8px}
+  .sec p{font-size:15px}
+  .tags{display:flex;flex-wrap:wrap;gap:7px}
+  .tag{background:var(--bg);border:1px solid var(--line);border-radius:18px;padding:5px 12px;font-size:13px;font-weight:600}
+  table.nutri{width:100%;border-collapse:collapse;font-size:14px}
+  table.nutri td{padding:7px 4px;border-bottom:1px solid var(--line)}
+  table.nutri td:first-child{color:var(--sub)}
+  table.nutri td:last-child{text-align:right;font-weight:700}
+  .basis{font-size:12px;color:var(--sub);margin-top:6px}
+  .links{display:flex;flex-wrap:wrap;gap:8px}
+  .lk{display:inline-flex;align-items:center;gap:5px;text-decoration:none;font-size:13px;font-weight:600;
+    padding:7px 13px;border-radius:20px;border:1px solid var(--line);color:var(--ink);background:var(--bg)}
+  .lk:hover{border-color:#bcae8e;background:#efe9d8}
+  footer{text-align:center;color:var(--sub);font-size:12px;padding:20px;line-height:1.7}
+</style>
+</head>
+<body>
+<header>
+  <h1>🌿 自然百科</h1>
+  <p>魚類．植物．中藥 — 分類、營養數值與功效，附查證來源</p>
+</header>
+
+<div class="wrap">
+  <div class="controls">
+    <div class="search">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input id="search" type="text" placeholder="搜尋名稱、營養素或功效…">
+    </div>
+    <div class="tabs">
+      <div class="tab active" data-cat="all">全部</div>
+      <div class="tab" data-cat="fish">🐟 魚類</div>
+      <div class="tab" data-cat="plant">🥬 植物</div>
+      <div class="tab" data-cat="herb">🌾 中藥</div>
+    </div>
+    <select id="sort" class="sortsel">
+      <option value="">排序：預設</option>
+      <option value="熱量">熱量（高→低）</option>
+      <option value="蛋白質">蛋白質（高→低）</option>
+      <option value="膳食纖維">膳食纖維（高→低）</option>
+    </select>
+  </div>
+  <div class="count" id="count"></div>
+  <div class="grid" id="grid"></div>
+  <div class="empty" id="empty" style="display:none">找不到符合的條目 🔍</div>
+</div>
+
+<div class="overlay" id="overlay"><div class="modal" id="modal"></div></div>
+
+<footer>
+  照片即時取自維基百科（需連網，離線時顯示圖示）；營養數值為每100克參考值，來源為 USDA FoodData Central 與衛福部食藥署資料庫。<br>
+  中藥功效屬傳統中醫觀點，藥材無常規營養標示故列主要活性成分；使用前請諮詢專業醫師。資料僅供教育參考。
+</footer>
+
+<script>
+const CAT={fish:{label:"魚類",cls:"fish"},plant:{label:"植物",cls:"plant"},herb:{label:"中藥",cls:"herb"}};
+
+// wiki: 維基百科條目標題（用於即時取圖與分類來源連結）
+// nutri100: 每100克參考值（食材）；藥材改列活性成分故省略
+// evidence: 數值/成分查證來源
+const DATA=[
+ {
+  "cat": "fish",
+  "icon": "🐟",
+  "name": "鮭魚",
+  "wiki": "鮭",
+  "alt": [
+   "en:Salmon"
+  ],
+  "latin": "Salmonidae（鮭科）",
+  "taxo": "硬骨魚綱 · 鮭形目 · 鮭科。常見大西洋鮭、太平洋鮭。",
+  "nutrients": [
+   "Omega-3 (EPA/DHA)",
+   "優質蛋白質",
+   "維生素D",
+   "維生素B12",
+   "硒"
+  ],
+  "nutri100": [
+   [
+    "熱量",
+    "208 kcal"
+   ],
+   [
+    "蛋白質",
+    "20 g"
+   ],
+   [
+    "脂肪",
+    "13 g"
+   ],
+   [
+    "Omega-3(EPA/DHA)",
+    "約 2.3 g"
+   ],
+   [
+    "維生素D",
+    "11 µg"
+   ],
+   [
+    "維生素B12",
+    "約 3.2 µg"
+   ],
+   [
+    "硒",
+    "約 36 µg"
+   ]
+  ],
+  "basis": "大西洋鮭，生（USDA）",
+  "benefit": "富含Omega-3，有助護心血管、抗發炎，並支持腦部與視力健康。",
+  "evidence": {
+   "label": "USDA 營養查證",
+   "url": "https://fdc.nal.usda.gov/food-search?query=salmon%20raw"
+  }
+ },
+ {
+  "cat": "fish",
+  "icon": "🐠",
+  "name": "鮪魚",
+  "wiki": "鮪魚",
+  "alt": [
+   "en:Tuna"
+  ],
+  "latin": "Scombridae（鯖科）",
+  "taxo": "硬骨魚綱 · 鯖形目 · 鯖科鮪屬。大型洄游海魚。",
+  "nutrients": [
+   "高蛋白",
+   "Omega-3",
+   "硒",
+   "維生素B群",
+   "菸鹼酸"
+  ],
+  "nutri100": [
+   [
+    "熱量",
+    "144 kcal"
+   ],
+   [
+    "蛋白質",
+    "23 g"
+   ],
+   [
+    "脂肪",
+    "5 g"
+   ],
+   [
+    "Omega-3(EPA/DHA)",
+    "約 1.3 g"
+   ],
+   [
+    "硒",
+    "36 µg"
+   ],
+   [
+    "菸鹼酸",
+    "約 8.6 mg"
+   ]
+  ],
+  "basis": "藍鰭鮪，生（USDA）",
+  "benefit": "低脂高蛋白，硒含量高有助抗氧化；大型鮪魚汞含量較高，孕婦宜適量。",
+  "evidence": {
+   "label": "USDA 營養查證",
+   "url": "https://fdc.nal.usda.gov/food-search?query=tuna%20raw"
+  }
+ },
+ {
+  "cat": "fish",
+  "icon": "🐟",
+  "name": "秋刀魚",
+  "wiki": "秋刀魚",
+  "alt": [
+   "en:Pacific saury"
+  ],
+  "latin": "Cololabis saira",
+  "taxo": "硬骨魚綱 · 頷針魚目 · 竹刀魚科。秋季盛產的平價海魚。",
+  "nutrients": [
+   "Omega-3(EPA/DHA)",
+   "維生素D",
+   "維生素B12",
+   "鈣",
+   "蛋白質"
+  ],
+  "nutri100": [
+   [
+    "熱量",
+    "約 297 kcal"
+   ],
+   [
+    "蛋白質",
+    "19 g"
+   ],
+   [
+    "脂肪",
+    "24 g"
+   ],
+   [
+    "Omega-3(EPA/DHA)",
+    "約 4.0 g"
+   ],
+   [
+    "維生素D",
+    "16 µg"
+   ],
+   [
+    "維生素B12",
+    "約 17.7 µg"
+   ],
+   [
+    "鈣",
+    "約 60 mg"
+   ]
+  ],
+  "basis": "秋刀魚，生（油脂高）",
+  "benefit": "油脂豐富、Omega-3含量高，CP值高，有助降三酸甘油酯、護腦。",
+  "evidence": {
+   "label": "USDA 營養查證",
+   "url": "https://fdc.nal.usda.gov/food-search?query=pacific%20saury"
+  }
+ },
+ {
+  "cat": "fish",
+  "icon": "🐟",
+  "name": "鯖魚",
+  "wiki": "鯖魚",
+  "alt": [
+   "zh:鯖屬",
+   "en:Atlantic mackerel"
+  ],
+  "latin": "Scomber（鯖屬）",
+  "taxo": "硬骨魚綱 · 鯖形目 · 鯖科。常見花腹鯖、白腹鯖。",
+  "nutrients": [
+   "Omega-3(EPA/DHA)",
+   "維生素D",
+   "維生素B12",
+   "硒",
+   "蛋白質"
+  ],
+  "nutri100": [
+   [
+    "熱量",
+    "205 kcal"
+   ],
+   [
+    "蛋白質",
+    "19 g"
+   ],
+   [
+    "脂肪",
+    "14 g"
+   ],
+   [
+    "Omega-3(EPA/DHA)",
+    "約 2.6 g"
+   ],
+   [
+    "維生素B12",
+    "8.7 µg"
+   ],
+   [
+    "維生素D",
+    "約 16 µg"
+   ],
+   [
+    "硒",
+    "約 44 µg"
+   ]
+  ],
+  "basis": "大西洋鯖，生（USDA）",
+  "benefit": "Omega-3密度極高、價格親民，是補充好油脂的優選；醃漬品需留意鈉。",
+  "evidence": {
+   "label": "USDA 營養查證",
+   "url": "https://fdc.nal.usda.gov/food-search?query=mackerel%20raw"
+  }
+ },
+ {
+  "cat": "fish",
+  "icon": "🐡",
+  "name": "鱸魚",
+  "wiki": "日本真鱸",
+  "alt": [
+   "zh:花鱸",
+   "en:Japanese sea bass"
+  ],
+  "latin": "Lateolabrax / Perciformes",
+  "taxo": "硬骨魚綱 · 鱸形目。淡水與海水皆有，肉質細緻。",
+  "nutrients": [
+   "優質蛋白",
+   "Omega-3",
+   "鋅",
+   "維生素A",
+   "膠原蛋白"
+  ],
+  "nutri100": [
+   [
+    "熱量",
+    "97 kcal"
+   ],
+   [
+    "蛋白質",
+    "18 g"
+   ],
+   [
+    "脂肪",
+    "2 g"
+   ],
+   [
+    "Omega-3(EPA/DHA)",
+    "約 0.7 g"
+   ],
+   [
+    "鋅",
+    "約 0.5 mg"
+   ],
+   [
+    "維生素A",
+    "約 30 µg"
+   ]
+  ],
+  "basis": "鱸魚，生（USDA sea bass）",
+  "benefit": "低脂好消化，傳統視為術後與產後補身食材，有助傷口修復。",
+  "evidence": {
+   "label": "USDA 營養查證",
+   "url": "https://fdc.nal.usda.gov/food-search?query=sea%20bass%20raw"
+  }
+ },
+ {
+  "cat": "fish",
+  "icon": "🐟",
+  "name": "虱目魚",
+  "wiki": "虱目魚",
+  "latin": "Chanos chanos",
+  "taxo": "硬骨魚綱 · 虱目魚目 · 虱目魚科。台灣重要養殖魚。",
+  "nutrients": [
+   "蛋白質",
+   "Omega-3",
+   "維生素B12",
+   "鈣",
+   "鉀"
+  ],
+  "nutri100": [
+   [
+    "熱量",
+    "約 190 kcal"
+   ],
+   [
+    "蛋白質",
+    "20 g"
+   ],
+   [
+    "脂肪",
+    "12 g"
+   ],
+   [
+    "Omega-3(EPA/DHA)",
+    "約 0.8 g"
+   ],
+   [
+    "維生素B12",
+    "約 3 µg"
+   ],
+   [
+    "鈣",
+    "約 50 mg"
+   ],
+   [
+    "鉀",
+    "約 290 mg"
+   ]
+  ],
+  "basis": "虱目魚，生（食藥署，近似值）",
+  "benefit": "蛋白質含量高、刺多但營養密集，魚肚部位油脂與膠質豐富。",
+  "evidence": {
+   "label": "食藥署資料庫",
+   "url": "https://consumer.fda.gov.tw/Food/TFND.aspx"
+  }
+ },
+ {
+  "cat": "fish",
+  "icon": "🐟",
+  "name": "鯛魚",
+  "wiki": "真鯛",
+  "latin": "Sparidae（鯛科）",
+  "taxo": "硬骨魚綱 · 鱸形目 · 鯛科。真鯛、黑鯛等，喜慶常見魚。",
+  "nutrients": [
+   "優質蛋白",
+   "牛磺酸",
+   "Omega-3",
+   "維生素B1",
+   "硒"
+  ],
+  "nutri100": [
+   [
+    "熱量",
+    "約 142 kcal"
+   ],
+   [
+    "蛋白質",
+    "20 g"
+   ],
+   [
+    "脂肪",
+    "6 g"
+   ],
+   [
+    "Omega-3(EPA/DHA)",
+    "約 0.5 g"
+   ],
+   [
+    "維生素B1",
+    "約 0.3 mg"
+   ],
+   [
+    "硒",
+    "約 36 µg"
+   ]
+  ],
+  "basis": "真鯛，生（近似值）",
+  "benefit": "肉質結實、脂肪適中，牛磺酸有助護肝與調節血壓。",
+  "evidence": {
+   "label": "USDA 營養查證",
+   "url": "https://fdc.nal.usda.gov/food-search?query=sea%20bream"
+  }
+ },
+ {
+  "cat": "fish",
+  "icon": "🍣",
+  "name": "鰻魚",
+  "wiki": "鰻鱺",
+  "alt": [
+   "zh:日本鰻鱺",
+   "en:Japanese eel"
+  ],
+  "latin": "Anguilla（鰻鱺屬）",
+  "taxo": "硬骨魚綱 · 鰻鱺目 · 鰻鱺科。降海洄游性魚類。",
+  "nutrients": [
+   "維生素A",
+   "維生素E",
+   "蛋白質",
+   "Omega-3",
+   "鋅"
+  ],
+  "nutri100": [
+   [
+    "熱量",
+    "184 kcal"
+   ],
+   [
+    "蛋白質",
+    "18 g"
+   ],
+   [
+    "脂肪",
+    "12 g"
+   ],
+   [
+    "Omega-3(EPA/DHA)",
+    "約 0.9 g"
+   ],
+   [
+    "維生素A",
+    "1040 µg"
+   ],
+   [
+    "維生素E",
+    "約 7 mg"
+   ],
+   [
+    "鋅",
+    "約 1.6 mg"
+   ]
+  ],
+  "basis": "鰻魚，生（USDA）",
+  "benefit": "維生素A、E含量極高，有助護眼、抗氧化與滋補體力，但熱量偏高。",
+  "evidence": {
+   "label": "USDA 營養查證",
+   "url": "https://fdc.nal.usda.gov/food-search?query=eel%20raw"
+  }
+ },
+ {
+  "cat": "fish",
+  "icon": "🐟",
+  "name": "沙丁魚",
+  "wiki": "沙丁魚",
+  "alt": [
+   "en:Sardine"
+  ],
+  "latin": "Clupeidae（鯡科）",
+  "taxo": "硬骨魚綱 · 鯡形目 · 鯡科。小型群游海魚。",
+  "nutrients": [
+   "鈣（連骨）",
+   "Omega-3",
+   "維生素D",
+   "維生素B12",
+   "蛋白質"
+  ],
+  "nutri100": [
+   [
+    "熱量",
+    "208 kcal"
+   ],
+   [
+    "蛋白質",
+    "25 g"
+   ],
+   [
+    "鈣",
+    "382 mg"
+   ],
+   [
+    "Omega-3(EPA/DHA)",
+    "約 1.5 g"
+   ],
+   [
+    "維生素D",
+    "4.8 µg"
+   ],
+   [
+    "維生素B12",
+    "約 8.9 µg"
+   ]
+  ],
+  "basis": "沙丁魚，油漬罐頭（USDA）",
+  "benefit": "連骨食用是極佳鈣與維生素D來源；汞含量低、相對安全。",
+  "evidence": {
+   "label": "USDA 營養查證",
+   "url": "https://fdc.nal.usda.gov/food-search?query=sardine"
+  }
+ },
+ {
+  "cat": "fish",
+  "icon": "🐟",
+  "name": "鱈魚",
+  "wiki": "鱈魚",
+  "alt": [
+   "zh:大西洋鱈",
+   "en:Atlantic cod"
+  ],
+  "latin": "Gadus（鱈屬）",
+  "taxo": "硬骨魚綱 · 鱈形目 · 鱈科。深海白肉魚。",
+  "nutrients": [
+   "低脂蛋白",
+   "維生素A",
+   "維生素D",
+   "碘",
+   "Omega-3"
+  ],
+  "nutri100": [
+   [
+    "熱量",
+    "82 kcal"
+   ],
+   [
+    "蛋白質",
+    "18 g"
+   ],
+   [
+    "脂肪",
+    "0.7 g"
+   ],
+   [
+    "Omega-3(EPA/DHA)",
+    "約 0.2 g"
+   ],
+   [
+    "維生素A",
+    "約 12 µg"
+   ],
+   [
+    "維生素D",
+    "約 0.9 µg"
+   ],
+   [
+    "碘",
+    "約 110 µg"
+   ]
+  ],
+  "basis": "大西洋鱈，生（USDA）",
+  "benefit": "脂肪低、蛋白質高，肉質軟嫩易消化，適合幼兒、長者與減脂者。",
+  "evidence": {
+   "label": "USDA 營養查證",
+   "url": "https://fdc.nal.usda.gov/food-search?query=cod%20raw"
+  }
+ },
+ {
+  "cat": "plant",
+  "icon": "🥬",
+  "name": "菠菜",
+  "wiki": "菠菜",
+  "latin": "Spinacia oleracea",
+  "taxo": "被子植物 · 石竹目 · 莧科。耐寒葉菜。",
+  "nutrients": [
+   "鐵",
+   "維生素K",
+   "葉酸",
+   "維生素A",
+   "葉黃素"
+  ],
+  "nutri100": [
+   [
+    "熱量",
+    "23 kcal"
+   ],
+   [
+    "蛋白質",
+    "2.9 g"
+   ],
+   [
+    "鐵",
+    "2.7 mg"
+   ],
+   [
+    "維生素K",
+    "483 µg"
+   ],
+   [
+    "葉酸",
+    "194 µg"
+   ],
+   [
+    "維生素A",
+    "約 469 µg RAE"
+   ],
+   [
+    "葉黃素",
+    "約 12 mg"
+   ]
+  ],
+  "basis": "菠菜，生（USDA）",
+  "benefit": "鐵與葉酸豐富有助造血，維生素K護骨；草酸較高，汆燙後食用較佳。",
+  "evidence": {
+   "label": "USDA 營養查證",
+   "url": "https://fdc.nal.usda.gov/food-search?query=spinach%20raw"
+  }
+ },
+ {
+  "cat": "plant",
+  "icon": "🥦",
+  "name": "花椰菜",
+  "wiki": "西蘭花",
+  "latin": "Brassica oleracea",
+  "taxo": "被子植物 · 十字花目 · 十字花科。含青花菜與白花菜。",
+  "nutrients": [
+   "維生素C",
+   "膳食纖維",
+   "蘿蔔硫素",
+   "葉酸",
+   "維生素K"
+  ],
+  "nutri100": [
+   [
+    "熱量",
+    "34 kcal"
+   ],
+   [
+    "維生素C",
+    "89 mg"
+   ],
+   [
+    "膳食纖維",
+    "2.6 g"
+   ],
+   [
+    "葉酸",
+    "63 µg"
+   ],
+   [
+    "維生素K",
+    "約 102 µg"
+   ]
+  ],
+  "basis": "青花菜，生（USDA）",
+  "benefit": "蘿蔔硫素具抗氧化與防癌研究價值，纖維助腸道健康。",
+  "evidence": {
+   "label": "USDA 營養查證",
+   "url": "https://fdc.nal.usda.gov/food-search?query=broccoli%20raw"
+  }
+ },
+ {
+  "cat": "plant",
+  "icon": "🍅",
+  "name": "番茄",
+  "wiki": "番茄",
+  "latin": "Solanum lycopersicum",
+  "taxo": "被子植物 · 茄目 · 茄科。果實作蔬菜食用。",
+  "nutrients": [
+   "茄紅素",
+   "維生素C",
+   "鉀",
+   "維生素A",
+   "葉酸"
+  ],
+  "nutri100": [
+   [
+    "熱量",
+    "18 kcal"
+   ],
+   [
+    "維生素C",
+    "14 mg"
+   ],
+   [
+    "鉀",
+    "237 mg"
+   ],
+   [
+    "茄紅素",
+    "約 2.6 mg"
+   ],
+   [
+    "維生素A",
+    "約 42 µg RAE"
+   ],
+   [
+    "葉酸",
+    "約 15 µg"
+   ]
+  ],
+  "basis": "番茄，生（USDA）",
+  "benefit": "茄紅素為強抗氧化物，加熱與油脂烹調更易吸收，有助護心與攝護腺。",
+  "evidence": {
+   "label": "USDA 營養查證",
+   "url": "https://fdc.nal.usda.gov/food-search?query=tomato%20raw"
+  }
+ },
+ {
+  "cat": "plant",
+  "icon": "🥕",
+  "name": "紅蘿蔔",
+  "wiki": "胡蘿蔔",
+  "latin": "Daucus carota",
+  "taxo": "被子植物 · 繖形目 · 繖形科。根莖類蔬菜。",
+  "nutrients": [
+   "β-胡蘿蔔素",
+   "維生素A",
+   "膳食纖維",
+   "鉀",
+   "維生素K"
+  ],
+  "nutri100": [
+   [
+    "熱量",
+    "41 kcal"
+   ],
+   [
+    "β-胡蘿蔔素",
+    "8285 µg"
+   ],
+   [
+    "維生素A",
+    "835 µg RAE"
+   ],
+   [
+    "膳食纖維",
+    "2.8 g"
+   ],
+   [
+    "鉀",
+    "約 320 mg"
+   ],
+   [
+    "維生素K",
+    "約 13 µg"
+   ]
+  ],
+  "basis": "胡蘿蔔，生（USDA）",
+  "benefit": "β-胡蘿蔔素在體內轉為維生素A，護眼、護皮膚與黏膜；油炒提升吸收。",
+  "evidence": {
+   "label": "USDA 營養查證",
+   "url": "https://fdc.nal.usda.gov/food-search?query=carrot%20raw"
+  }
+ },
+ {
+  "cat": "plant",
+  "icon": "🍠",
+  "name": "地瓜",
+  "wiki": "番薯",
+  "latin": "Ipomoea batatas",
+  "taxo": "被子植物 · 茄目 · 旋花科。塊根作主食。",
+  "nutrients": [
+   "膳食纖維",
+   "β-胡蘿蔔素",
+   "鉀",
+   "維生素C",
+   "複合碳水"
+  ],
+  "nutri100": [
+   [
+    "熱量",
+    "86 kcal"
+   ],
+   [
+    "膳食纖維",
+    "3 g"
+   ],
+   [
+    "β-胡蘿蔔素",
+    "8509 µg"
+   ],
+   [
+    "鉀",
+    "337 mg"
+   ],
+   [
+    "維生素C",
+    "約 2.4 mg"
+   ],
+   [
+    "碳水化合物",
+    "約 20 g"
+   ]
+  ],
+  "basis": "地瓜，生（USDA）",
+  "benefit": "高纖低GI、飽足感佳，是優質全食物澱粉，有助腸道與血糖穩定。",
+  "evidence": {
+   "label": "USDA 營養查證",
+   "url": "https://fdc.nal.usda.gov/food-search?query=sweet%20potato%20raw"
+  }
+ },
+ {
+  "cat": "plant",
+  "icon": "🧄",
+  "name": "大蒜",
+  "wiki": "大蒜",
+  "latin": "Allium sativum",
+  "taxo": "被子植物 · 天門冬目 · 石蒜科蔥屬。辛香調味植物。",
+  "nutrients": [
+   "大蒜素",
+   "硒",
+   "維生素B6",
+   "錳",
+   "維生素C"
+  ],
+  "nutri100": [
+   [
+    "熱量",
+    "149 kcal"
+   ],
+   [
+    "維生素C",
+    "31 mg"
+   ],
+   [
+    "錳",
+    "1.7 mg"
+   ],
+   [
+    "硒",
+    "14 µg"
+   ],
+   [
+    "維生素B6",
+    "約 1.2 mg"
+   ]
+  ],
+  "basis": "大蒜，生（每100克；實際食用量少）",
+  "benefit": "大蒜素具抗菌、抗氧化作用，研究指有助調節血脂與血壓；切碎靜置數分鐘更有效。",
+  "evidence": {
+   "label": "USDA 營養查證",
+   "url": "https://fdc.nal.usda.gov/food-search?query=garlic%20raw"
+  }
+ },
+ {
+  "cat": "plant",
+  "icon": "🥬",
+  "name": "高麗菜",
+  "wiki": "結球甘藍",
+  "latin": "Brassica oleracea var. capitata",
+  "taxo": "被子植物 · 十字花目 · 十字花科。結球甘藍。",
+  "nutrients": [
+   "維生素C",
+   "維生素K",
+   "維生素U",
+   "膳食纖維",
+   "葉酸"
+  ],
+  "nutri100": [
+   [
+    "熱量",
+    "25 kcal"
+   ],
+   [
+    "維生素C",
+    "37 mg"
+   ],
+   [
+    "維生素K",
+    "76 µg"
+   ],
+   [
+    "膳食纖維",
+    "2.5 g"
+   ],
+   [
+    "葉酸",
+    "約 43 µg"
+   ]
+  ],
+  "basis": "高麗菜，生（USDA）",
+  "benefit": "維生素U傳統用於養護胃黏膜，纖維助消化、熱量低。",
+  "evidence": {
+   "label": "USDA 營養查證",
+   "url": "https://fdc.nal.usda.gov/food-search?query=cabbage%20raw"
+  }
+ },
+ {
+  "cat": "plant",
+  "icon": "🎃",
+  "name": "南瓜",
+  "wiki": "南瓜",
+  "latin": "Cucurbita（南瓜屬）",
+  "taxo": "被子植物 · 葫蘆目 · 葫蘆科。果實作蔬菜。",
+  "nutrients": [
+   "β-胡蘿蔔素",
+   "鉀",
+   "膳食纖維",
+   "維生素C",
+   "維生素E"
+  ],
+  "nutri100": [
+   [
+    "熱量",
+    "26 kcal"
+   ],
+   [
+    "β-胡蘿蔔素",
+    "3100 µg"
+   ],
+   [
+    "鉀",
+    "340 mg"
+   ],
+   [
+    "維生素C",
+    "9 mg"
+   ],
+   [
+    "膳食纖維",
+    "約 0.5 g"
+   ],
+   [
+    "維生素E",
+    "約 1.1 mg"
+   ]
+  ],
+  "basis": "南瓜，生（USDA）",
+  "benefit": "橙黃色來自豐富類胡蘿蔔素，護眼抗氧化；南瓜籽富含鋅與好油脂。",
+  "evidence": {
+   "label": "USDA 營養查證",
+   "url": "https://fdc.nal.usda.gov/food-search?query=pumpkin%20raw"
+  }
+ },
+ {
+  "cat": "plant",
+  "icon": "🥑",
+  "name": "酪梨",
+  "wiki": "鱷梨",
+  "latin": "Persea americana",
+  "taxo": "被子植物 · 樟目 · 樟科。高脂肪果實。",
+  "nutrients": [
+   "單元不飽和脂肪",
+   "維生素E",
+   "鉀",
+   "葉酸",
+   "膳食纖維"
+  ],
+  "nutri100": [
+   [
+    "熱量",
+    "160 kcal"
+   ],
+   [
+    "脂肪",
+    "15 g"
+   ],
+   [
+    "鉀",
+    "485 mg"
+   ],
+   [
+    "膳食纖維",
+    "7 g"
+   ],
+   [
+    "單元不飽和脂肪",
+    "約 10 g"
+   ],
+   [
+    "維生素E",
+    "約 2.1 mg"
+   ],
+   [
+    "葉酸",
+    "約 81 µg"
+   ]
+  ],
+  "basis": "酪梨，生（USDA）",
+  "benefit": "富含健康油脂與鉀，有助護心、穩定膽固醇，並提升脂溶性維生素吸收。",
+  "evidence": {
+   "label": "USDA 營養查證",
+   "url": "https://fdc.nal.usda.gov/food-search?query=avocado%20raw"
+  }
+ },
+ {
+  "cat": "plant",
+  "icon": "🫐",
+  "name": "藍莓",
+  "wiki": "藍莓",
+  "latin": "Vaccinium",
+  "taxo": "被子植物 · 杜鵑花目 · 杜鵑花科。漿果。",
+  "nutrients": [
+   "花青素",
+   "維生素C",
+   "維生素K",
+   "錳",
+   "膳食纖維"
+  ],
+  "nutri100": [
+   [
+    "熱量",
+    "57 kcal"
+   ],
+   [
+    "維生素C",
+    "9.7 mg"
+   ],
+   [
+    "維生素K",
+    "19 µg"
+   ],
+   [
+    "膳食纖維",
+    "2.4 g"
+   ],
+   [
+    "錳",
+    "約 0.34 mg"
+   ]
+  ],
+  "basis": "藍莓，生（USDA）",
+  "benefit": "花青素抗氧化力強，研究指有助護眼、護腦與抗發炎，是高CP值莓果。",
+  "evidence": {
+   "label": "USDA 營養查證",
+   "url": "https://fdc.nal.usda.gov/food-search?query=blueberries%20raw"
+  }
+ },
+ {
+  "cat": "plant",
+  "icon": "🫘",
+  "name": "黃豆",
+  "wiki": "大豆",
+  "latin": "Glycine max",
+  "taxo": "被子植物 · 豆目 · 豆科。重要油料與蛋白作物。",
+  "nutrients": [
+   "植物性完整蛋白",
+   "大豆異黃酮",
+   "卵磷脂",
+   "鐵",
+   "膳食纖維"
+  ],
+  "nutri100": [
+   [
+    "熱量",
+    "173 kcal"
+   ],
+   [
+    "蛋白質",
+    "16.6 g"
+   ],
+   [
+    "脂肪",
+    "9 g"
+   ],
+   [
+    "膳食纖維",
+    "6 g"
+   ],
+   [
+    "鐵",
+    "約 5.1 mg"
+   ]
+  ],
+  "basis": "黃豆，煮熟（USDA）",
+  "benefit": "少數含完整必需胺基酸的植物蛋白，異黃酮有助調節更年期與骨質健康。",
+  "evidence": {
+   "label": "USDA 營養查證",
+   "url": "https://fdc.nal.usda.gov/food-search?query=soybeans%20cooked"
+  }
+ },
+ {
+  "cat": "herb",
+  "icon": "🔴",
+  "name": "枸杞",
+  "wiki": "枸杞",
+  "latin": "Lycium barbarum（枸杞子）",
+  "taxo": "茄科枸杞屬。乾燥成熟果實入藥。性平、味甘。",
+  "nutrients": [
+   "枸杞多醣",
+   "玉米黃素",
+   "β-胡蘿蔔素",
+   "維生素C",
+   "鋅"
+  ],
+  "nutri100": [
+   [
+    "熱量",
+    "約 349 kcal"
+   ],
+   [
+    "蛋白質",
+    "14 g"
+   ],
+   [
+    "維生素C",
+    "48 mg"
+   ],
+   [
+    "鐵",
+    "6.8 mg"
+   ],
+   [
+    "β-胡蘿蔔素",
+    "約 7380 µg"
+   ],
+   [
+    "鋅",
+    "約 2 mg"
+   ]
+  ],
+  "basis": "枸杞乾果，每100克（食藥兩用）",
+  "benefit": "傳統用於滋補肝腎、明目；玉米黃素護眼，多醣體抗氧化研究受重視。",
+  "evidence": {
+   "label": "研究文獻 PubMed",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/?term=Lycium+barbarum"
+  }
+ },
+ {
+  "cat": "herb",
+  "icon": "🟤",
+  "name": "紅棗",
+  "wiki": "棗",
+  "latin": "Ziziphus jujuba（大棗）",
+  "taxo": "鼠李科棗屬。乾燥成熟果實。性溫、味甘。",
+  "nutrients": [
+   "環磷酸腺苷",
+   "維生素C",
+   "鐵",
+   "鉀",
+   "膳食纖維"
+  ],
+  "nutri100": [
+   [
+    "熱量",
+    "約 284 kcal"
+   ],
+   [
+    "膳食纖維",
+    "6 g"
+   ],
+   [
+    "鉀",
+    "531 mg"
+   ],
+   [
+    "鐵",
+    "約 1.8 mg"
+   ]
+  ],
+  "basis": "紅棗乾，每100克（食藥兩用）",
+  "benefit": "補中益氣、養血安神，常入湯方調和藥性，亦為日常養生茶飲材料。",
+  "evidence": {
+   "label": "研究文獻 PubMed",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/?term=Ziziphus+jujuba"
+  }
+ },
+ {
+  "cat": "herb",
+  "icon": "🌱",
+  "name": "當歸",
+  "wiki": "當歸",
+  "latin": "Angelica sinensis",
+  "taxo": "繖形科當歸屬。乾燥根部入藥。性溫、味甘辛。",
+  "nutrients": [
+   "阿魏酸",
+   "當歸多醣",
+   "揮發油",
+   "藁本內酯"
+  ],
+  "benefit": "補血活血、調經止痛，為婦科常用藥，常見於四物湯等補血方。",
+  "evidence": {
+   "label": "研究文獻 PubMed",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/?term=Angelica+sinensis"
+  }
+ },
+ {
+  "cat": "herb",
+  "icon": "🌾",
+  "name": "黃耆",
+  "wiki": "黃芪",
+  "latin": "Astragalus membranaceus",
+  "taxo": "豆科黃耆屬。乾燥根部入藥。性微溫、味甘。",
+  "nutrients": [
+   "黃耆多醣",
+   "黃耆皂苷",
+   "黃酮類",
+   "胺基酸"
+  ],
+  "benefit": "補氣固表、利水消腫；多醣體與增強免疫研究廣泛，常與紅棗、枸杞同煮。",
+  "evidence": {
+   "label": "研究文獻 PubMed",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/?term=Astragalus+membranaceus"
+  }
+ },
+ {
+  "cat": "herb",
+  "icon": "🥕",
+  "name": "人參",
+  "wiki": "人參",
+  "latin": "Panax ginseng",
+  "taxo": "五加科人參屬。乾燥根部。性微溫、味甘微苦。",
+  "nutrients": [
+   "人參皂苷",
+   "多醣",
+   "胜肽",
+   "揮發油"
+  ],
+  "benefit": "大補元氣、復脈固脫、生津安神；著名滋補要藥，體質燥熱者宜慎用。",
+  "evidence": {
+   "label": "研究文獻 PubMed",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/?term=Panax+ginseng"
+  }
+ },
+ {
+  "cat": "herb",
+  "icon": "🟡",
+  "name": "甘草",
+  "wiki": "甘草",
+  "latin": "Glycyrrhiza uralensis",
+  "taxo": "豆科甘草屬。乾燥根與根莖。性平、味甘。",
+  "nutrients": [
+   "甘草酸（甜素）",
+   "甘草苷",
+   "黃酮類",
+   "多醣"
+  ],
+  "benefit": "補脾益氣、清熱解毒、調和諸藥；過量易致水腫與血壓上升，應節制。",
+  "evidence": {
+   "label": "研究文獻 PubMed",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/?term=Glycyrrhiza"
+  }
+ },
+ {
+  "cat": "herb",
+  "icon": "🌿",
+  "name": "川芎",
+  "wiki": "川芎",
+  "latin": "Ligusticum chuanxiong",
+  "taxo": "繖形科藁本屬。乾燥根莖。性溫、味辛。",
+  "nutrients": [
+   "川芎嗪",
+   "阿魏酸",
+   "揮發油",
+   "生物鹼"
+  ],
+  "benefit": "活血行氣、祛風止痛，為「血中氣藥」，常用於頭痛與經痛的調理方。",
+  "evidence": {
+   "label": "研究文獻 PubMed",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/?term=Ligusticum+chuanxiong"
+  }
+ },
+ {
+  "cat": "herb",
+  "icon": "⚪",
+  "name": "茯苓",
+  "wiki": "茯苓",
+  "latin": "Poria cocos",
+  "taxo": "多孔菌科真菌。乾燥菌核入藥。性平、味甘淡。",
+  "nutrients": [
+   "茯苓多醣",
+   "三萜類",
+   "卵磷脂",
+   "蛋白質"
+  ],
+  "benefit": "利水滲濕、健脾寧心，藥性平和、男女老幼皆宜，常入四神湯。",
+  "evidence": {
+   "label": "研究文獻 PubMed",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/?term=Poria+cocos"
+  }
+ },
+ {
+  "cat": "herb",
+  "icon": "🍠",
+  "name": "山藥",
+  "wiki": "山藥",
+  "latin": "Dioscorea（薯蕷／淮山）",
+  "taxo": "薯蕷科薯蕷屬。乾燥根莖入藥，亦作食材。性平、味甘。",
+  "nutrients": [
+   "黏液蛋白",
+   "薯蕷皂苷",
+   "澱粉酶",
+   "維生素C",
+   "鉀"
+  ],
+  "nutri100": [
+   [
+    "熱量",
+    "118 kcal"
+   ],
+   [
+    "蛋白質",
+    "1.5 g"
+   ],
+   [
+    "鉀",
+    "816 mg"
+   ],
+   [
+    "維生素C",
+    "17 mg"
+   ]
+  ],
+  "basis": "山藥（薯蕷），生（USDA yam；食藥兩用）",
+  "benefit": "補脾養胃、生津益肺、補腎澀精；藥食兩用，黏液蛋白有助保護消化道。",
+  "evidence": {
+   "label": "USDA 營養查證",
+   "url": "https://fdc.nal.usda.gov/food-search?query=yam%20raw"
+  }
+ },
+ {
+  "cat": "herb",
+  "icon": "🌼",
+  "name": "菊花",
+  "wiki": "菊花",
+  "latin": "Chrysanthemum morifolium",
+  "taxo": "菊科菊屬。乾燥頭狀花序入藥。性微寒、味甘苦。",
+  "nutrients": [
+   "黃酮類",
+   "綠原酸",
+   "揮發油",
+   "維生素A原"
+  ],
+  "benefit": "疏散風熱、清肝明目，常與枸杞泡茶，緩解眼睛疲勞與頭目昏脹。",
+  "evidence": {
+   "label": "研究文獻 PubMed",
+   "url": "https://pubmed.ncbi.nlm.nih.gov/?term=Chrysanthemum+morifolium"
+  }
+ }
+];
+
+const grid=document.getElementById('grid'),empty=document.getElementById('empty'),
+      countEl=document.getElementById('count'),searchEl=document.getElementById('search'),
+      sortEl=document.getElementById('sort');
+let curCat='all';
+
+function nutVal(d,label){
+  if(!d.nutri100) return null;
+  const row=d.nutri100.find(r=>(r[0]===label||r[0].indexOf(label)===0));
+  if(!row) return null;
+  const n=parseFloat(String(row[1]).replace(/[^0-9.]/g,''));
+  return isNaN(n)?null:n;
+}
+function nutText(d,label){
+  const row=d.nutri100&&d.nutri100.find(r=>(r[0]===label||r[0].indexOf(label)===0));
+  return row?row[1]:'—';
+}
+const imgCache={};
+
+function wikiUrl(t){return 'https://zh.wikipedia.org/wiki/'+encodeURIComponent(t);}
+
+async function fetchOne(lang,title){
+  try{
+    const u='https://'+lang+'.wikipedia.org/w/api.php?action=query&format=json&origin=*&redirects=1&prop=pageimages&piprop=thumbnail&pithumbsize=480&titles='+encodeURIComponent(title);
+    const r=await fetch(u); const j=await r.json();
+    const p=Object.values(j.query.pages)[0];
+    return (p&&p.thumbnail)?p.thumbnail.source:null;
+  }catch(e){ return null; }
+}
+async function fetchImg(d){
+  if(d.name in imgCache) return imgCache[d.name];
+  const cands=[['zh',d.wiki]];
+  (d.alt||[]).forEach(a=>{ const i=a.indexOf(':'); cands.push([a.slice(0,i),a.slice(i+1)]); });
+  let src=null;
+  for(const c of cands){ src=await fetchOne(c[0],c[1]); if(src) break; }
+  imgCache[d.name]=src;
+  return src;
+}
+function applyImg(d,imgEl){
+  fetchImg(d).then(src=>{ if(src){ imgEl.src=src; imgEl.style.display='block';
+    const em=imgEl.parentElement.querySelector('.emoji'); if(em) em.style.display='none'; } });
+}
+
+function render(){
+  const q=searchEl.value.trim().toLowerCase();
+  const list=DATA.filter(d=>{
+    if(curCat!=='all'&&d.cat!==curCat) return false;
+    if(!q) return true;
+    return (d.name+d.latin+d.taxo+d.benefit+d.nutrients.join('')).toLowerCase().includes(q);
+  });
+  const sortKey=sortEl.value;
+  if(sortKey){
+    list.sort((a,b)=>{
+      const va=nutVal(a,sortKey),vb=nutVal(b,sortKey);
+      if(va===null&&vb===null) return 0;
+      if(va===null) return 1;
+      if(vb===null) return -1;
+      return vb-va;
+    });
+  }
+  grid.innerHTML='';
+  list.forEach(d=>{
+    const idx=DATA.indexOf(d),c=CAT[d.cat];
+    const card=document.createElement('div'); card.className='card'+(sortKey&&nutVal(d,sortKey)===null?' dim':'');
+    card.innerHTML=`
+      <div class="thumb ${c.cls}"><span class="emoji">${d.icon}</span><img alt="${d.name}"></div>
+      <div class="card-body">
+        <h3>${d.name}</h3><div class="latin">${d.latin}</div>
+        <span class="pill ${c.cls}">${c.label}</span>
+        <div class="teaser">${sortKey ? sortKey+'：'+nutText(d,sortKey) : '富含：'+d.nutrients.slice(0,3).join('、')}</div>
+      </div>`;
+    card.onclick=()=>openModal(idx);
+    grid.appendChild(card);
+    applyImg(d, card.querySelector('img'));
+  });
+  empty.style.display=list.length?'none':'block';
+  countEl.textContent=`共 ${list.length} 個條目`;
+}
+
+const overlay=document.getElementById('overlay'),modal=document.getElementById('modal');
+function openModal(i){
+  const d=DATA[i],c=CAT[d.cat];
+  const _tl=(d.nutri100||[]).map(r=>r[0]);
+  const _norm=s=>s.replace(/[\s()（）]/g,'');
+  const _KW=['蛋白','脂肪','碳水','Omega-3'];
+  const _cov=tag=>{const nt=_norm(tag);return _tl.some(l=>{const nl=_norm(l);if(nl===nt||nl.indexOf(nt)>=0||nt.indexOf(nl)>=0)return true;return _KW.some(k=>nt.indexOf(k)>=0&&nl.indexOf(k)>=0);});};
+  const _extra=d.nutrients.filter(n=>!_cov(n));
+  const _extraNote=_extra.length?'<div class="basis">其他主要成分（未列每100克數值）：'+_extra.join('、')+'</div>':'';
+  const nutriSec = d.nutri100 ? `
+      <div class="sec"><h4>每100克營養（參考）</h4>
+        <table class="nutri">${d.nutri100.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td></tr>`).join('')}</table>
+        <div class="basis">基準：${d.basis}</div>${_extraNote}
+      </div>` : `
+      <div class="sec"><h4>營養標示</h4>
+        <p style="font-size:14px;color:var(--sub)">藥材以小劑量入藥，無常規每100克營養標示，故改列主要活性成分（見上）。</p>
+      </div>`;
+  modal.innerHTML=`
+    <div class="m-photo ${c.cls}">
+      <button class="close" onclick="closeModal()">&times;</button>
+      <span class="emoji">${d.icon}</span><img alt="${d.name}">
+      <span class="m-credit">圖片來源：維基百科</span>
+    </div>
+    <div class="modal-title"><h2>${d.name}</h2><div class="m-latin">${d.latin}</div></div>
+    <div class="modal-body">
+      <div class="sec"><h4>分類學</h4><p>${d.taxo}</p></div>
+      <div class="sec"><h4>主要營養／活性成分</h4>
+        <div class="tags">${d.nutrients.map(n=>`<span class="tag">${n}</span>`).join('')}</div></div>
+      ${nutriSec}
+      <div class="sec"><h4>功效與用途</h4><p>${d.benefit}</p></div>
+      <div class="sec"><h4>查證來源</h4>
+        <div class="links">
+          <a class="lk" target="_blank" rel="noopener" href="${wikiUrl(d.wiki)}">維基百科（分類）</a>
+          <a class="lk" target="_blank" rel="noopener" href="${d.evidence.url}">${d.evidence.label}</a>
+        </div></div>
+    </div>`;
+  const img=modal.querySelector('.m-photo img'),credit=modal.querySelector('.m-credit'),
+        em=modal.querySelector('.m-photo .emoji');
+  fetchImg(d).then(src=>{ if(src){ img.src=src; img.style.display='block'; credit.style.display='block'; if(em) em.style.display='none'; } });
+  overlay.classList.add('show');
+}
+function closeModal(){overlay.classList.remove('show');}
+overlay.onclick=e=>{if(e.target===overlay)closeModal();};
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+
+const SORTOPTS={
+  fish:[['Omega-3','Omega-3（高到低）'],['蛋白質','蛋白質（高到低）'],['熱量','熱量（高到低）']],
+  plant:[['維生素C','維生素C（高到低）'],['膳食纖維','膳食纖維（高到低）'],['熱量','熱量（高到低）']],
+  herb:[['熱量','熱量（高到低）'],['膳食纖維','膳食纖維（高到低）']]
+};
+const SORTGROUPS_ALL=[
+  ['通用',[['熱量','熱量（高到低）'],['蛋白質','蛋白質（高到低）'],['膳食纖維','膳食纖維（高到低）']]],
+  ['魚類',[['Omega-3','Omega-3（高到低）']]],
+  ['植物',[['維生素C','維生素C（高到低）']]]
+];
+function rebuildSort(){
+  const prev=sortEl.value;
+  let html='<option value="">排序：預設</option>';
+  if(curCat==='all'){
+    for(const g of SORTGROUPS_ALL){
+      html+='<optgroup label="'+g[0]+'">'+g[1].map(o=>'<option value="'+o[0]+'">'+o[1]+'</option>').join('')+'</optgroup>';
+    }
+  }else{
+    html+=(SORTOPTS[curCat]||[]).map(o=>'<option value="'+o[0]+'">'+o[1]+'</option>').join('');
+  }
+  sortEl.innerHTML=html;
+  sortEl.value=[...sortEl.options].some(o=>o.value===prev)?prev:'';
+}
+document.querySelectorAll('.tab').forEach(t=>{
+  t.onclick=()=>{document.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));
+    t.classList.add('active');curCat=t.dataset.cat;rebuildSort();render();};
+});
+searchEl.addEventListener('input',render);
+sortEl.addEventListener('change',render);
+rebuildSort();render();
+</script>
+</body>
+</html>
